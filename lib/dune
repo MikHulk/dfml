@@ -1,0 +1,6 @@
+(library
+ (public_name dataframe)
+ (name dataframe)
+ (inline_tests)
+ (preprocess (pps ppx_inline_test))
+)
