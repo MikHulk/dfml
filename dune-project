@@ -5,22 +5,16 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github MikHulk/dfml))
 
-(authors "Author Name")
+(authors "Mik H.")
 
-(maintainers "Maintainer Name")
-
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+(maintainers "Li Monad")
 
 (package
  (name dataframe)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "Dataframe with ocaml à la Polars.")
+ (description "A little dataframe library for filtering, selecting and transforming data in place")
  (depends ocaml dune)
  (tags
-  (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
+  (data)))
