@@ -29,8 +29,10 @@ module Column : sig
   val numcol_of_list: int -> int list -> column
   val strcol_of_list: string list -> column
   val get: column -> int -> ftype
+  val print_column: int -> column -> unit
 
 end
+
 open Column
 open Column.Ftype
 

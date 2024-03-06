@@ -43,6 +43,41 @@ module Column = struct
       | String s -> Some s
       | _ -> None
 
+
+    let to_str fd =
+      match fd with
+        Integer x -> string_of_int x
+      | Numeric (p, x) ->
+        string_of_int (x / (10 ** p)) ^ "." ^ string_of_int (x mod (10 ** p))
+      | String s -> s
+
+    let%test _ = to_str (Integer 42) = "42"
+    let%test _ = to_str (Numeric (1, 422)) = "42.2"
+    let%test _ = to_str (String "42") = "42"
+
+
+    let print_ftype width v =
+      let s = to_str v in
+      let l = String.length s in
+      if l = width
+      then
+        print_string s
+      else if l > width
+      then print_string ((String.sub s 0 (width - 3)) ^ "...")
+      else
+        match v with
+          String _ ->
+          print_string s;
+          for _= 0 to (width - l) do
+            print_string " "
+          done
+        | _ ->
+          for _= 0 to (width - l) do
+            print_string " "
+          done;
+          print_string s
+
+
     let map f v =
       match f, v with
         ApplyOnInt f, Integer x -> Integer (f x)
@@ -110,6 +145,21 @@ module Column = struct
     | StringC arr, String s ->
       arr.(rowid) <- s
     | _, _ -> raise (Invalid_argument "bad operation")
+
+  let print_column w =
+    let print s = 
+        fun v ->
+          print_string "| ";
+          print_ftype w (s v);
+          print_string " |";
+          print_newline ()
+    in function
+    | StringC arr ->
+      Array.iter (print (fun v -> String v)) arr;
+    | IntegerC arr ->
+      Array.iter (print (fun v -> Integer v)) arr;
+    | NumericC (p, arr) ->
+      Array.iter (print (fun v -> Numeric (p, v))) arr;
 
 end
 
