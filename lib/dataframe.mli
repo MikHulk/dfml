@@ -19,9 +19,9 @@ module Column : sig
   val unwrap_int: ftype -> int option
   val unwrap_numeric: ftype -> float option
   val unwrap_string: ftype -> string option
-  val integer_of_list: int list -> column
-  val numeric_of_list: int -> int list -> column
-  val string_of_list: string list -> column
+  val intcol_of_list: int list -> column
+  val numcol_of_list: int -> int list -> column
+  val strcol_of_list: string list -> column
   val get: column -> int -> ftype
     
 end

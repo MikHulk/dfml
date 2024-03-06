@@ -52,29 +52,29 @@ module Column = struct
     | String s -> Some s
     | _ -> None
 
-  let integer_of_list ll =
+  let intcol_of_list ll =
     IntegerC (Array.of_list ll)
 
   let%test _ =
-    match integer_of_list [1;2;3;4] with
+    match intcol_of_list [1;2;3;4] with
       IntegerC _ -> true
     | _ -> false
 
 
-  let numeric_of_list precision ll =
+  let numcol_of_list precision ll =
     NumericC (precision, Array.of_list ll)
 
   let%test _ =
-    match numeric_of_list 2 [156;232;367;432] with
+    match numcol_of_list 2 [156;232;367;432] with
       NumericC (p, arr) -> p = 2 && arr.(1) = 232
     | _ -> false
 
 
-  let string_of_list ll =
+  let strcol_of_list ll =
     StringC (Array.of_list ll)
 
   let%test _ =
-    match string_of_list ["un";"deux";"trois";"quatre"] with
+    match  strcol_of_list ["un";"deux";"trois";"quatre"] with
       StringC arr -> arr = [|"un";"deux";"trois";"quatre"|]
     | _ -> false
 
@@ -132,7 +132,7 @@ let of_list ll =
 let%test _ =
   match of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]])
@@ -151,7 +151,7 @@ let get ds col row =
 let%test _ = get (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -161,7 +161,7 @@ let%test _ = get (
 let%test _ = get (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -178,7 +178,7 @@ let get' ds col row =
 let%test _ = get' (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -189,7 +189,7 @@ let%test _ = try
     get' (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -211,7 +211,7 @@ let%test _ =
   get_column (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -223,7 +223,7 @@ let%test _ =
   get_column (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -244,7 +244,7 @@ let%test _ =
   get_row (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -255,7 +255,7 @@ let%test _ =
   get_row (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -266,7 +266,7 @@ let%test _ =
   get_row (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -276,7 +276,7 @@ let%test _ =
 let%test _ = get_row (
     of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -301,7 +301,7 @@ let%test _ = get_all (
       (
         of_list (
           List.map
-            Column.integer_of_list
+            Column.intcol_of_list
             [[1;2;3;4;5]
             ;[1;1;2;2;2]
             ;[2;8;3;9;10]]
@@ -315,7 +315,7 @@ let%test _ = get_all (
       (
         of_list (
           List.map
-            Column.integer_of_list
+            Column.intcol_of_list
             [[1;2;3;4;5]
             ;[1;1;2;2;2]
             ;[2;8;3;9;10]]
@@ -332,7 +332,7 @@ let%test _ = get_all (
       (
         of_list (
           List.map
-            Column.integer_of_list
+            Column.intcol_of_list
             [[1;2;3;4;5]
             ;[1;1;2;2;2]
             ;[2;8;3;9;10]]
@@ -362,7 +362,7 @@ let%test _ = List.rev (
         (
           of_list (
             List.map
-              Column.integer_of_list
+              Column.intcol_of_list
               [[1;2;3;4;5]
               ;[1;1;2;2;2]
               ;[2;8;3;9;10]]
@@ -379,7 +379,7 @@ let%test _ = List.rev (
         (
           of_list (
             List.map
-              Column.integer_of_list
+              Column.intcol_of_list
               [[1;2;3;4;5]
               ;[1;1;2;2;2]
               ;[2;8;3;9;10]]
@@ -400,7 +400,7 @@ let%test _ = List.rev (
         (
           of_list (
             List.map
-              Column.integer_of_list
+              Column.intcol_of_list
               [[1;2;3;4;5]
               ;[1;1;2;2;2]
               ;[2;8;3;9;10]]
@@ -422,7 +422,7 @@ let ( *: ) s f =
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -444,7 +444,7 @@ let%test _ =
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -459,7 +459,7 @@ let%test _ =
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -490,7 +490,7 @@ let ( +: ) s f =
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -511,7 +511,7 @@ let%test _ =
 let%test _ = 
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -527,7 +527,7 @@ let%test _ =
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -561,7 +561,7 @@ let transform s f t ds
 let%test _ =
   let ds = of_list (
       List.map
-        Column.integer_of_list
+        Column.intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
@@ -586,9 +586,9 @@ let%test _ =
 
 let%test _ =
   let ds = of_list
-      [ Column.integer_of_list [1;2;3;4;5]
-      ; Column.numeric_of_list 2 [145;156;243;212;265]
-      ; Column.string_of_list ["foo";"bar";"foobar";"foobarfoo";"barfoobar"]]
+      [ Column.intcol_of_list [1;2;3;4;5]
+      ; Column.numcol_of_list 2 [145;156;243;212;265]
+      ; Column.strcol_of_list ["foo";"bar";"foobar";"foobarfoo";"barfoobar"]]
   in
   let sele = select (fun (i,_) -> i = 2) in
   let filt = filter 1
@@ -598,7 +598,7 @@ let%test _ =
           | None -> false
       )
   in
-  transform sele filt (Column.ApplyOnStr (fun _ -> "spam")) ds;
+  transform sele filt (ApplyOnStr (fun _ -> "spam")) ds;
   List.of_seq (
     ((select (fun _ -> true)) +: (filter 0 (fun _ -> true))) ds
   ) =
