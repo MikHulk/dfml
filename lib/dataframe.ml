@@ -146,20 +146,25 @@ module Column = struct
       arr.(rowid) <- s
     | _, _ -> raise (Invalid_argument "bad operation")
 
-  let print_column w =
-    let print s = 
-        fun v ->
-          print_string "| ";
-          print_ftype w (s v);
-          print_string " |";
-          print_newline ()
+  let print_column limit width =
+    let print f =
+      print_string "| ";
+      print_ftype width f;
+      print_string " |";
+      print_newline ()
     in function
     | StringC arr ->
-      Array.iter (print (fun v -> String v)) arr;
+      Seq.iter
+        (fun v -> print (String v))
+        (Seq.take limit (Array.to_seq arr))
     | IntegerC arr ->
-      Array.iter (print (fun v -> Integer v)) arr;
+      Seq.iter
+        (fun v -> print (Integer v))
+        (Seq.take limit (Array.to_seq arr))
     | NumericC (p, arr) ->
-      Array.iter (print (fun v -> Numeric (p, v))) arr;
+      Seq.iter
+        (fun v -> print (Numeric (p, v)))
+        (Seq.take limit (Array.to_seq arr))
 
 end
 
