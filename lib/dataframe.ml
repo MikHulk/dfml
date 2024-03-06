@@ -12,7 +12,7 @@ module Column = struct
   type application =
     | ApplyOnInt of (int -> int)
     | ApplyOnStr of (string -> string)
-        
+
   let rec pow a = function
     | 0 -> 1
     | 1 -> a
@@ -21,7 +21,7 @@ module Column = struct
       b * b * (if n mod 2 = 0 then 1 else a)
 
   let%test _ = pow 2 2 = 4
-  
+
   let ( ** ) a = pow a
 
   let to_seq = function
@@ -139,7 +139,7 @@ let%test _ =
   with
     Data _ -> true
   | _ -> false
-    
+
 let get ds col row =
   match ds with
     Empty -> None
@@ -250,7 +250,7 @@ let%test _ =
         ;[2;8;3;9;10]]
     )
   ) 2 = Some([|Integer 3;Integer 2;Integer 3|])
-    
+
 let%test _ =
   get_row (
     of_list (
@@ -261,7 +261,7 @@ let%test _ =
         ;[2;8;3;9;10]]
     )
   ) 2 <> Some([|Integer 1;Integer 1;Integer 2|])
-    
+
 let%test _ =
   get_row (
     of_list (
@@ -272,7 +272,7 @@ let%test _ =
         ;[2;8;3;9;10]]
     )
   ) 0 = Some([|Integer 1;Integer 1;Integer 2|])
-    
+
 let%test _ = get_row (
     of_list (
       List.map
@@ -387,7 +387,7 @@ let%test _ = List.rev (
       )
     )
   ) = []
-      
+
 let%test _ = List.rev (
     Seq.fold_left ( fun acc x -> x::acc) [] (
       filter
@@ -440,7 +440,7 @@ let%test _ =
   List.of_seq (
     (sele *: filt) ds
   ) = [[Integer 2;Integer 1];[Integer 4;Integer 2];[Integer 5;Integer 2]]
-      
+
 let%test _ =
   let ds = of_list (
       List.map
@@ -507,7 +507,7 @@ let%test _ =
   List.of_seq (
     (sele +: filt) ds
   ) = [[Integer 2;Integer 4;Integer 5];[Integer 1;Integer 2;Integer 2]]
-      
+
 let%test _ = 
   let ds = of_list (
       List.map
