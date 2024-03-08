@@ -2,7 +2,7 @@
 opam-version: "2.0"
 synopsis: "Dataframe with ocaml à la Polars."
 description:
-  "A little dataframe library for filtering, selecting and transforming data in place"
+  "A little dataframe library for filtering, selecting and transforming heterogenous data in place"
 maintainer: ["Li Monad"]
 authors: ["Mik H."]
 tags: ["data"]
