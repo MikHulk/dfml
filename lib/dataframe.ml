@@ -179,7 +179,6 @@ type dataset =
   | Empty
   | Data of int * int * column array
 
-
 let of_list ll =
   match ll with
     [] -> Empty
@@ -298,8 +297,10 @@ let get_row ds row =
   match ds with
     Empty -> None
   | Data (h, _, arr) ->
-    if row < h
-    then Some (Array.map (fun col -> Column.get col row) arr)
+    if abs row < h
+    then
+      let row = if row < 0 then h + row else row in
+      Some (Array.map (fun col -> Column.get col row) arr)
     else None
 
 let%test _ =
@@ -315,14 +316,21 @@ let%test _ =
 
 let%test _ =
   get_row (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  ) 2 <> Some([|Integer 1;Integer 1;Integer 2|])
+    of_list
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+  ) 2 = Some([|Integer 3;Numeric (1, 2);String "3"|])
+
+let%test _ =
+  get_row (
+    of_list
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+  ) (-3) = Some([|Integer 3;Numeric (1, 2);String "3"|])
 
 let%test _ =
   get_row (
