@@ -172,12 +172,13 @@ open Column
 open Column.Ftype
 
 let enumerate s = Seq.mapi (fun i x -> (i, x)) s
-
 let filteri f s = Seq.filter f (enumerate s)
+let flip f x y = f y x
 
 type dataset =
   | Empty
   | Data of int * int * column array
+
 
 let of_list ll =
   match ll with
@@ -318,6 +319,82 @@ let%test _ =
     )
   ) 3
   = None
+
+
+let get_columns ds cols =
+  Seq.filter_map (get_column ds) cols
+
+let%test _ =
+  let
+    ds = of_list (
+      List.map
+        intcol_of_list
+        [[1;2;3;4;5]
+        ;[1;1;2;2;2]
+        ;[2;8;3;9;10]]
+    )
+  in List.rev (
+    Seq.fold_left (flip List.cons) []
+      (get_columns ds (List.to_seq [0;1;2])))
+     = [IntegerC [|1;2;3;4;5|]
+       ;IntegerC [|1;1;2;2;2|]
+       ;IntegerC [|2;8;3;9;10|]
+       ]
+
+let%test _ =
+  let
+    ds = of_list (
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+    )
+  in List.rev (
+    Seq.fold_left (flip List.cons) []
+      (get_columns ds (List.to_seq [0;1;2])))
+     = [IntegerC [|1;2;3;4;5|]
+       ;NumericC (1, [|1;1;2;2;2|])
+       ;StringC [|"2";"8";"3";"9";"10"|]
+       ]
+
+let%test _ =
+  let
+    ds = of_list (
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+    )
+  in List.rev (
+    Seq.fold_left (flip List.cons) [] (get_columns ds Seq.empty)
+  ) = []
+
+let%test _ =
+  let
+    ds = of_list (
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+    )
+  in List.rev (
+    Seq.fold_left (flip List.cons) []
+      (get_columns ds (List.to_seq [2]))
+  ) = [StringC [|"2";"8";"3";"9";"10"|]]
+
+let%test _ =
+  let
+    ds = of_list (
+      [ intcol_of_list [1;2;3;4;5]
+      ; numcol_of_list 1 [1;1;2;2;2]
+      ; strcol_of_list ["2";"8";"3";"9";"10"]
+      ]
+    )
+  in List.rev (
+    Seq.fold_left (flip List.cons) [] (get_columns ds (List.to_seq [2;0]))
+  ) = [ StringC [|"2";"8";"3";"9";"10"|]
+      ; IntegerC [|1;2;3;4;5|]
+      ]
 
 
 let get_row ds row =
