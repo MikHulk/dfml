@@ -205,8 +205,11 @@ let get ds col row =
   match ds with
     Empty -> None
   | Data (h, w, arr) ->
-    if col < w && row < h
-    then Some (Column.get arr.(col) row)
+    if abs col < w && abs row < h
+    then
+      let col = if col >= 0 then col else w + col
+      and row = if row >= 0 then row else h + row
+      in Some (Column.get arr.(col) row)
     else None
 
 let%test _ = get (
@@ -218,6 +221,16 @@ let%test _ = get (
         ;[2;8;3;9;10]]
     )
   ) 2 4 = Some(Integer 10)
+
+let%test _ = get (
+    of_list (
+      List.map
+        intcol_of_list
+        [[1;2;3;4;5]
+        ;[1;1;2;2;2]
+        ;[2;8;3;9;10]]
+    )
+  ) (-1) (-1) = Some(Integer 10)
 
 let%test _ = get (
     of_list (
@@ -265,7 +278,9 @@ let get_column ds col =
     Empty -> None
   | Data (_, w, arr) ->
     if col < w
-    then Some arr.(col)
+    then
+      let col = if col >= 0 then col else w + col
+      in Some arr.(col)
     else None
 
 let%test _ =
@@ -279,6 +294,18 @@ let%test _ =
     )
   ) 2
   = Some(IntegerC [|2;8;3;9;10|])
+
+let%test _ =
+  get_column (
+    of_list (
+      List.map
+        intcol_of_list
+        [[1;2;3;4;5]
+        ;[1;1;2;2;2]
+        ;[2;8;3;9;10]]
+    )
+  ) (-3)
+  = Some(IntegerC [|1;2;3;4;5|])
 
 let%test _ =
   get_column (
