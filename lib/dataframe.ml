@@ -4,6 +4,8 @@ module Column = struct
     | NumericC of int * int array
     | StringC of string array
 
+  type selection = int Seq.t
+
   module Ftype = struct
     type ftype =
       | Integer of int
@@ -55,7 +57,6 @@ module Column = struct
     let%test _ = to_str (Numeric (1, 422)) = "42.2"
     let%test _ = to_str (String "42") = "42"
 
-
     let print_ftype width v =
       let s = to_str v in
       let l = String.length s in
@@ -77,7 +78,6 @@ module Column = struct
           done;
           print_string s
 
-
     let map f v =
       match f, v with
         ApplyOnInt f, Integer x -> Integer (f x)
@@ -88,6 +88,8 @@ module Column = struct
   end
 
   open Ftype
+
+  let enumerate s = Seq.mapi (fun i x -> (i, x)) s
 
   let to_seq = function
     | IntegerC arr -> Seq.map (fun v -> Integer v) (Array.to_seq arr)
@@ -132,6 +134,42 @@ module Column = struct
     | NumericC (p, arr) -> Numeric (p, arr.(row))
     | StringC arr -> String arr.(row)
 
+  let select (f: ftype -> bool) (col: column): int Seq.t =
+    let sigma (i, x) = if f x then Some(i) else None
+    in Seq.filter_map sigma (enumerate (to_seq col))
+
+  let%test _ =
+    Seq.fold_left (Fun.flip List.cons) [] (
+      select
+        ( fun fd ->
+            match fd with
+              Integer x -> x > 2
+            | _ -> false
+        )
+        ( intcol_of_list [1;2;3;4] )
+    )
+    = [3;2]
+
+  let filter col sel =
+    match col with
+      IntegerC arr -> Seq.map (fun i -> Integer arr.(i)) sel
+    | NumericC (p, arr) -> Seq.map (fun i -> Numeric (p, arr.(i))) sel
+    | StringC arr -> Seq.map (fun i -> String arr.(i)) sel
+
+  let%test _ =
+    let col = intcol_of_list [1;2;3;4] in
+    let sel = select
+        ( fun fd ->
+            match fd with
+              Integer x -> x > 2
+            | _ -> false
+        ) col
+    in
+    Seq.fold_left (Fun.flip List.cons) [] (
+      filter col sel
+    )
+    = [Integer 4; Integer 3]
+
   let set rowid col t =
     match col, t with
       NumericC (p, arr), Numeric (p', x) ->
@@ -170,10 +208,6 @@ end
 
 open Column
 open Column.Ftype
-
-let enumerate s = Seq.mapi (fun i x -> (i, x)) s
-let filteri f s = Seq.filter f (enumerate s)
-let flip f x y = f y x
 
 type dataset =
   | Empty
@@ -334,7 +368,7 @@ let%test _ =
         ;[2;8;3;9;10]]
     )
   in List.rev (
-    Seq.fold_left (flip List.cons) []
+    Seq.fold_left (Fun.flip List.cons) []
       (get_columns ds (List.to_seq [0;1;2])))
      = [IntegerC [|1;2;3;4;5|]
        ;IntegerC [|1;1;2;2;2|]
@@ -350,7 +384,7 @@ let%test _ =
       ]
     )
   in List.rev (
-    Seq.fold_left (flip List.cons) []
+    Seq.fold_left (Fun.flip List.cons) []
       (get_columns ds (List.to_seq [0;1;2])))
      = [IntegerC [|1;2;3;4;5|]
        ;NumericC (1, [|1;1;2;2;2|])
@@ -366,7 +400,7 @@ let%test _ =
       ]
     )
   in List.rev (
-    Seq.fold_left (flip List.cons) [] (get_columns ds Seq.empty)
+    Seq.fold_left (Fun.flip List.cons) [] (get_columns ds Seq.empty)
   ) = []
 
 let%test _ =
@@ -378,7 +412,7 @@ let%test _ =
       ]
     )
   in List.rev (
-    Seq.fold_left (flip List.cons) []
+    Seq.fold_left (Fun.flip List.cons) []
       (get_columns ds (List.to_seq [2]))
   ) = [StringC [|"2";"8";"3";"9";"10"|]]
 
@@ -391,7 +425,7 @@ let%test _ =
       ]
     )
   in List.rev (
-    Seq.fold_left (flip List.cons) [] (get_columns ds (List.to_seq [2;0]))
+    Seq.fold_left (Fun.flip List.cons) [] (get_columns ds (List.to_seq [2;0]))
   ) = [ StringC [|"2";"8";"3";"9";"10"|]
       ; IntegerC [|1;2;3;4;5|]
       ]
@@ -456,331 +490,3 @@ let%test _ = get_row (
         ;[2;8;3;9;10]]
     )
   ) 5 = None
-
-
-let select f ds =
-  match ds with
-    Empty -> Seq.empty
-  | Data (_, _, arr) -> filteri f (Array.to_seq arr)
-
-let get_all seq =
-  List.rev (Seq.fold_left (fun acc (i, a) -> (i, a) :: acc) [] seq)
-
-let%test _ = get_all (
-    select
-      (fun (_, a) ->
-         Seq.fold_left ( + ) 0
-           (Seq.filter_map unwrap_int (to_seq a)) > 8
-      )
-      (
-        of_list (
-          List.map
-            intcol_of_list
-            [[1;2;3;4;5]
-            ;[1;1;2;2;2]
-            ;[2;8;3;9;10]]
-        )
-      )
-  ) = [(0, IntegerC [|1;2;3;4;5|]);(2, IntegerC [|2;8;3;9;10|])]
-
-let%test _ = get_all (
-    select
-      (fun _ -> true)
-      (
-        of_list (
-          List.map
-            intcol_of_list
-            [[1;2;3;4;5]
-            ;[1;1;2;2;2]
-            ;[2;8;3;9;10]]
-        )
-      )
-  ) = [(0, IntegerC [|1;2;3;4;5|])
-      ;(1, IntegerC [|1;1;2;2;2|])
-      ;(2, IntegerC [|2;8;3;9;10|])
-      ]
-
-let%test _ = get_all (
-    select
-      (fun _ -> false)
-      (
-        of_list (
-          List.map
-            intcol_of_list
-            [[1;2;3;4;5]
-            ;[1;1;2;2;2]
-            ;[2;8;3;9;10]]
-        )
-      )
-  ) = []
-
-
-let filter col_id f ds =
-  match ds with
-    Empty -> Seq.empty
-  | _ ->
-    begin
-      match get_column ds col_id with
-        Some col ->
-        begin
-          Seq.map (fun (i, _) -> i) (filteri f (Column.to_seq col))
-        end
-      | None -> Seq.empty
-    end
-
-let%test _ = List.rev (
-    Seq.fold_left ( fun acc x -> x::acc) [] (
-      filter
-        0
-        (fun _ -> true)
-        (
-          of_list (
-            List.map
-              intcol_of_list
-              [[1;2;3;4;5]
-              ;[1;1;2;2;2]
-              ;[2;8;3;9;10]]
-          )
-        )
-    )
-  ) = [0;1;2;3;4]
-
-let%test _ = List.rev (
-    Seq.fold_left ( fun acc x -> x::acc) [] (
-      filter
-        0
-        (fun _ -> false)
-        (
-          of_list (
-            List.map
-              intcol_of_list
-              [[1;2;3;4;5]
-              ;[1;1;2;2;2]
-              ;[2;8;3;9;10]]
-          )
-      )
-    )
-  ) = []
-
-let%test _ = List.rev (
-    Seq.fold_left ( fun acc x -> x::acc) [] (
-      filter
-        0
-        (fun (_, field) ->
-           match unwrap_int field with
-             Some(v) -> v >  2
-           | _ -> false
-        )
-        (
-          of_list (
-            List.map
-              intcol_of_list
-              [[1;2;3;4;5]
-              ;[1;1;2;2;2]
-              ;[2;8;3;9;10]]
-          )
-        )
-    )
-  ) = [2;3;4]
-
-
-let ( *: ) s f =
-  fun ds ->
-  begin
-    let rows = f ds
-    in Seq.map (
-      fun row ->
-        List.rev
-          (Seq.fold_left (fun acc (_, col) -> (Column.get col row)::acc) [] (s ds))
-    ) rows
-  end
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun (i, _) -> i = 0 || i = 1) in
-  let filt =
-    filter 2
-      ( fun (_, field) ->
-          match (unwrap_int field) with
-            Some v -> v > 5
-          | None -> false
-      )
-  in
-  List.of_seq (
-    (sele *: filt) ds
-  ) = [[Integer 2;Integer 1];[Integer 4;Integer 2];[Integer 5;Integer 2]]
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun (i, _) -> i = 0 || i = 1) in
-  let filt = filter 2 (fun _ -> false) in
-  List.of_seq (
-    (sele *: filt) ds
-  ) = []
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun _ -> false) in
-  let filt = filter 2
-      ( fun (_, f) ->
-          match (unwrap_int f) with
-            Some v -> v > 5
-          | None -> false
-      )
-  in
-  List.of_seq (
-    (sele *: filt) ds
-  ) = [[];[];[]]
-
-
-let ( +: ) s f =
-  fun ds ->
-  begin
-    let rows = f ds
-    in Seq.map (
-      fun (_, col) ->
-        List.rev (
-          Seq.fold_left (fun acc row -> (Column.get col row)::acc) [] rows)
-    ) (s ds)
-  end
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun (i, _) -> i = 0 || i = 1) in
-  let filt = filter 2
-      ( fun (_, f) ->
-          match unwrap_int f with
-            Some v -> v > 5
-          | None -> false
-      )
-  in
-  List.of_seq (
-    (sele +: filt) ds
-  ) = [[Integer 2;Integer 4;Integer 5];[Integer 1;Integer 2;Integer 2]]
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun (i, _) -> i = 0 || i = 1) in
-  let filt = filter 2 (fun _ -> false) in
-  List.of_seq (
-    (sele +: filt) ds
-  ) = [[];[]]
-
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun _ -> false) in
-  let filt = filter 2
-      ( fun (_, f) ->
-          match unwrap_int f with
-            Some v -> v > 5
-          | None -> false
-      )
-  in
-  List.of_seq (
-    (sele +: filt) ds
-  ) = []
-
-
-let transform s f t ds
-  : unit =
-  let cols = (s ds) in
-  let rows = (f ds) in
-  Seq.iter (
-    fun rowid ->
-      Seq.iter (
-        fun (_, col) ->
-          set rowid col (map t (Column.get col rowid))
-      ) cols
-  ) rows
-
-let%test _ =
-  let ds = of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  in
-  let sele = select (fun (i,_) -> i = 1) in
-  let filt = filter 2
-      ( fun (_, f) ->
-          match unwrap_int f with
-            Some v -> v > 5
-          | None -> false
-      )
-  in
-  transform sele filt (ApplyOnInt (fun x -> x + 2)) ds;
-  List.of_seq (
-    ((select (fun _ -> true)) +: (filter 0 (fun _ -> true))) ds
-  ) =
-  [ [Integer 1;Integer 2;Integer 3;Integer 4;Integer 5]
-  ; [Integer 1;Integer 3;Integer 2;Integer 4;Integer 4]
-  ; [Integer 2;Integer 8;Integer 3;Integer 9;Integer 10]
-  ]
-
-let%test _ =
-  let ds = of_list
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 2 [145;156;243;212;265]
-      ; strcol_of_list ["foo";"bar";"foobar";"foobarfoo";"barfoobar"]]
-  in
-  let sele = select (fun (i,_) -> i = 2) in
-  let filt = filter 1
-      ( fun (_, f) ->
-          match unwrap_numeric f with
-            Some v -> v > 2.2
-          | None -> false
-      )
-  in
-  transform sele filt (ApplyOnStr (fun _ -> "spam")) ds;
-  List.of_seq (
-    ((select (fun _ -> true)) +: (filter 0 (fun _ -> true))) ds
-  ) =
-  [ [Integer 1;Integer 2;Integer 3;Integer 4;Integer 5]
-  ; [Numeric(2, 145);Numeric(2, 156);Numeric(2, 243);Numeric(2, 212);Numeric(2, 265)]
-  ; [String "foo";String "bar";String "spam";String "foobarfoo";String "spam"]
-  ]

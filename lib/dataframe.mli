@@ -13,6 +13,7 @@ module Column : sig
     val unwrap_int: ftype -> int option
     val unwrap_numeric: ftype -> float option
     val unwrap_string: ftype -> string option
+    val map: application -> ftype -> ftype
 
   end
 
@@ -23,12 +24,17 @@ module Column : sig
     | NumericC of int * int array
     | StringC of string array
 
+  type selection = int Seq.t
+
   val to_seq: column -> ftype Seq.t
   val length: column -> int
   val intcol_of_list: int list -> column
   val numcol_of_list: int -> int list -> column
   val strcol_of_list: string list -> column
+  val select: (ftype -> bool) -> column -> selection
+  val filter: column -> selection -> ftype Seq.t
   val get: column -> int -> ftype
+  val set: int -> column -> ftype -> unit
   val print_column: int -> int -> column -> unit
 
 end
@@ -44,23 +50,3 @@ val of_list: column list -> dataset
 val get: dataset -> int -> int -> ftype option
 val get_column: dataset -> int -> column option
 val get_row: dataset -> int -> ftype array option
-val select: (int * column -> bool) -> dataset -> (int * Column.column) Seq.t
-val get_all: (int * column) Seq.t -> (int * column) list
-val filter: int -> (int * ftype -> bool) -> dataset -> int Seq.t
-
-val ( *: ):
-  (dataset -> (int * column) Seq.t)
-  -> (dataset -> int Seq.t)
-  -> (dataset -> ftype list Seq.t)
-
-val ( +: ):
-  (dataset -> (int * column) Seq.t)
-  -> (dataset -> int Seq.t)
-  -> (dataset -> ftype list Seq.t)
-
-val transform:
-  (dataset -> (int * column) Seq.t)
-  -> (dataset -> int Seq.t)
-  -> application
-  -> dataset
-  -> unit
