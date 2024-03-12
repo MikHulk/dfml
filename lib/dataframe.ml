@@ -50,7 +50,9 @@ module Column = struct
       match fd with
         Integer x -> string_of_int x
       | Numeric (p, x) ->
-        string_of_int (x / (10 ** p)) ^ "." ^ string_of_int (x mod (10 ** p))
+        string_of_int (x / (10 ** p))
+        ^ "."
+        ^ string_of_int (x mod (10 ** p))
       | String s -> s
 
     let%test _ = to_str (Integer 42) = "42"
@@ -139,15 +141,14 @@ module Column = struct
     in Seq.filter_map sigma (enumerate (to_seq col))
 
   let%test _ =
-    Seq.fold_left (Fun.flip List.cons) [] (
-      select
-        ( fun fd ->
-            match fd with
-              Integer x -> x > 2
-            | _ -> false
-        )
-        ( intcol_of_list [1;2;3;4] )
+    intcol_of_list [1;2;3;4]
+    |> select (
+      fun fd ->
+        match fd with
+          Integer x -> x > 2
+        | _ -> false
     )
+    |> Seq.fold_left (Fun.flip List.cons) []
     = [3;2]
 
   let filter col sel =
@@ -158,16 +159,15 @@ module Column = struct
 
   let%test _ =
     let col = intcol_of_list [1;2;3;4] in
-    let sel = select
-        ( fun fd ->
-            match fd with
-              Integer x -> x > 2
-            | _ -> false
-        ) col
+    let sel = col |> select (
+        fun fd ->
+          match fd with
+            Integer x -> x > 2
+          | _ -> false
+      )
     in
-    Seq.fold_left (Fun.flip List.cons) [] (
-      filter col sel
-    )
+    filter col sel
+    |> Seq.fold_left (Fun.flip List.cons) []
     = [Integer 4; Integer 3]
 
   let set rowid col t =
@@ -185,24 +185,21 @@ module Column = struct
     | _, _ -> raise (Invalid_argument "bad operation")
 
   let print_column limit width =
-    let print f =
+    let print field =
       print_string "| ";
-      print_ftype width f;
+      print_ftype width field;
       print_string " |";
       print_newline ()
     in function
     | StringC arr ->
-      Seq.iter
-        (fun v -> print (String v))
-        (Seq.take limit (Array.to_seq arr))
+      Seq.take limit (Array.to_seq arr)
+      |> Seq.iter (fun v -> print (String v))
     | IntegerC arr ->
-      Seq.iter
-        (fun v -> print (Integer v))
-        (Seq.take limit (Array.to_seq arr))
+      Seq.take limit (Array.to_seq arr)
+      |> Seq.iter (fun v -> print (Integer v))
     | NumericC (p, arr) ->
-      Seq.iter
-        (fun v -> print (Numeric (p, v)))
-        (Seq.take limit (Array.to_seq arr))
+      Seq.take limit (Array.to_seq arr)
+      |> Seq.iter (fun v -> print (Numeric (p, v)))
 
 end
 
@@ -222,16 +219,16 @@ let of_list ll =
     let width = List.length ll in
     if List.for_all (fun col -> height = length col) t
     then Data (height, width, (Array.of_list ll))
-    else raise
-        (Invalid_argument "column must have the same size")
+    else Invalid_argument "column must have the same size"
+         |> raise
 
 let%test _ =
-  match of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]])
+  match 
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   with
     Data _ -> true
   | _ -> false
@@ -247,34 +244,31 @@ let get ds col row =
       in Some (Column.get arr.(col) row)
     else None
 
-let%test _ = get (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+let%test _ =
+  get (
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) 2 4 = Some(Integer 10)
 
-let%test _ = get (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+let%test _ =
+  get (
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) (-1) (-1) = Some(Integer 10)
 
-let%test _ = get (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+let%test _ =
+  get (
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) 2 5 = None
 
 
@@ -284,28 +278,26 @@ let get' ds col row =
   | Data (_, _, arr) ->
     Column.get arr.(col) row
 
-let%test _ = get' (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+let%test _ =
+  get' (
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) 2 4 = Integer 10
 
 let%test _ = try
     get' (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  ) 2 5 = Integer (Random.int 100)
-  with Invalid_argument _ -> true
-     | _ -> false
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list 
+    ) 2 5 = Integer (Random.int 100)
+  with
+    Invalid_argument _ -> true
+  | _ -> false
 
 
 let get_column ds col =
@@ -320,37 +312,31 @@ let get_column ds col =
 
 let%test _ =
   get_column (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) 2
   = Some(IntegerC [|2;8;3;9;10|])
 
 let%test _ =
   get_column (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list 
   ) (-3)
   = Some(IntegerC [|1;2;3;4;5|])
 
 let%test _ =
   get_column (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+    [[1;2;3;4;5]
+    ;[1;1;2;2;2]
+    ;[2;8;3;9;10]]
+    |> List.map intcol_of_list
+    |> of_list
   ) 3
   = None
 
@@ -367,13 +353,14 @@ let%test _ =
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
     )
-  in List.rev (
-    Seq.fold_left (Fun.flip List.cons) []
-      (get_columns ds (List.to_seq [0;1;2])))
-     = [IntegerC [|1;2;3;4;5|]
-       ;IntegerC [|1;1;2;2;2|]
-       ;IntegerC [|2;8;3;9;10|]
-       ]
+  in List.to_seq [0;1;2]
+     |> get_columns ds
+     |> Seq.fold_left (Fun.flip List.cons) []
+     |> List.rev =
+        [IntegerC [|1;2;3;4;5|]
+        ;IntegerC [|1;1;2;2;2|]
+        ;IntegerC [|2;8;3;9;10|]
+        ]
 
 let%test _ =
   let
@@ -383,13 +370,14 @@ let%test _ =
       ; strcol_of_list ["2";"8";"3";"9";"10"]
       ]
     )
-  in List.rev (
-    Seq.fold_left (Fun.flip List.cons) []
-      (get_columns ds (List.to_seq [0;1;2])))
-     = [IntegerC [|1;2;3;4;5|]
-       ;NumericC (1, [|1;1;2;2;2|])
-       ;StringC [|"2";"8";"3";"9";"10"|]
-       ]
+  in List.to_seq [0;1;2]
+     |> get_columns ds
+     |> Seq.fold_left (Fun.flip List.cons) []
+     |> List.rev =
+        [IntegerC [|1;2;3;4;5|]
+        ;NumericC (1, [|1;1;2;2;2|])
+        ;StringC [|"2";"8";"3";"9";"10"|]
+        ]
 
 let%test _ =
   let
@@ -399,9 +387,9 @@ let%test _ =
       ; strcol_of_list ["2";"8";"3";"9";"10"]
       ]
     )
-  in List.rev (
-    Seq.fold_left (Fun.flip List.cons) [] (get_columns ds Seq.empty)
-  ) = []
+  in get_columns ds Seq.empty
+     |> Seq.fold_left (Fun.flip List.cons) []
+     |> List.rev = []
 
 let%test _ =
   let
@@ -411,10 +399,9 @@ let%test _ =
       ; strcol_of_list ["2";"8";"3";"9";"10"]
       ]
     )
-  in List.rev (
-    Seq.fold_left (Fun.flip List.cons) []
-      (get_columns ds (List.to_seq [2]))
-  ) = [StringC [|"2";"8";"3";"9";"10"|]]
+  in get_columns ds (List.to_seq [2])
+   |> Seq.fold_left (Fun.flip List.cons) []
+   |> List.rev = [StringC [|"2";"8";"3";"9";"10"|]]
 
 let%test _ =
   let
@@ -424,9 +411,10 @@ let%test _ =
       ; strcol_of_list ["2";"8";"3";"9";"10"]
       ]
     )
-  in List.rev (
-    Seq.fold_left (Fun.flip List.cons) [] (get_columns ds (List.to_seq [2;0]))
-  ) = [ StringC [|"2";"8";"3";"9";"10"|]
+  in get_columns ds (List.to_seq [2;0])
+   |> Seq.fold_left (Fun.flip List.cons) []
+   |> List.rev =
+      [ StringC [|"2";"8";"3";"9";"10"|]
       ; IntegerC [|1;2;3;4;5|]
       ]
 
@@ -443,13 +431,12 @@ let get_row ds row =
 
 let%test _ =
   get_row (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
+    List.map
+      intcol_of_list
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+    |> of_list
   ) 2 = Some([|Integer 3;Integer 2;Integer 3|])
 
 let%test _ =
