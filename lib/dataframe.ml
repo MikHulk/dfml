@@ -184,7 +184,7 @@ module Column = struct
       arr.(rowid) <- s
     | _, _ -> raise (Invalid_argument "bad operation")
 
-  
+
   let update col f rowid =
     get col rowid |> map f |> set col rowid
 
@@ -205,6 +205,28 @@ module Column = struct
     let f = ApplyOnStr (fun s ->  s ^ "2") in
     update col f 2;
     col = StringC [|"1";"2";"32";"4"|]
+
+
+  let update_rows col f rowids =
+    Seq.iter (update col f) rowids
+
+  let%test _ =
+    let col = intcol_of_list [1;2;3;4] in
+    let f = ApplyOnInt (fun x -> x * 2) in
+    update_rows col f (List.to_seq [2;3]);
+    col = IntegerC [|1;2;6;8|]
+
+  let%test _ =
+    let col = numcol_of_list 1 [1;2;3;4] in
+    let f = ApplyOnInt (fun x -> x * 2) in
+    update_rows col f (List.to_seq [2;3]);
+    col = NumericC (1, [|1;2;6;8|])
+
+  let%test _ =
+    let col = strcol_of_list ["1";"2";"3";"4"] in
+    let f = ApplyOnStr (fun s ->  s ^ "2") in
+    update_rows col f (List.to_seq [2;3]);
+    col = StringC [|"1";"2";"32";"42"|]
 
 
   let print_column limit width =
@@ -246,12 +268,12 @@ let of_list ll =
          |> raise
 
 let%test _ =
-  match 
+  match
     [[1;2;3;4;5]
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   with
     Data _ -> true
   | _ -> false
@@ -273,7 +295,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) 2 4 = Some(Integer 10)
 
 let%test _ =
@@ -282,7 +304,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) (-1) (-1) = Some(Integer 10)
 
 let%test _ =
@@ -291,7 +313,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) 2 5 = None
 
 
@@ -307,7 +329,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) 2 4 = Integer 10
 
 let%test _ = try
@@ -316,7 +338,7 @@ let%test _ = try
       ;[1;1;2;2;2]
       ;[2;8;3;9;10]]
       |> List.map intcol_of_list
-      |> of_list 
+      |> of_list
     ) 2 5 = Integer (Random.int 100)
   with
     Invalid_argument _ -> true
@@ -339,7 +361,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) 2
   = Some(IntegerC [|2;8;3;9;10|])
 
@@ -349,7 +371,7 @@ let%test _ =
     ;[1;1;2;2;2]
     ;[2;8;3;9;10]]
     |> List.map intcol_of_list
-    |> of_list 
+    |> of_list
   ) (-3)
   = Some(IntegerC [|1;2;3;4;5|])
 

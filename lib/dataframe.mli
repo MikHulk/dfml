@@ -35,6 +35,8 @@ module Column : sig
   val filter: column -> selection -> ftype Seq.t
   val get: column -> int -> ftype
   val set: column -> int -> ftype -> unit
+  val update: column -> application -> int -> unit
+  val update_rows: column -> application -> int Seq.t -> unit
   val print_column: int -> int -> column -> unit
 
 end
