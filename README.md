@@ -44,7 +44,7 @@ val col : Dataframe.Column.column option =
 now we build a selector function on the given column
 
 ```ocaml
-let sele = Dataframe.Column.select f (Dataframe.get_column s 2);;
+let sele = Dataframe.Column.select f (Option.get (Dataframe.get_column s 2));;
 ```
 
 sele is a `Seq.t` on the rowid which match the selector function on the column `col`
@@ -52,9 +52,8 @@ sele is a `Seq.t` on the rowid which match the selector function on the column `
 We can now obtain all the elements in each column corresponding to this subset:
 
 ```ocaml
-let res = Dataframe.Column.filter (Option.get col) (Option.get sele);;
+let res = Dataframe.Column.filter (Option.get col) sele;;
 List.rev (Seq.fold_left (Fun.flip List.cons) [] res);;
-- : Dataframe.Column.Ftype.ftype list =
 ```
 
 result:

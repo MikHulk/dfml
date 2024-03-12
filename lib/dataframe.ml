@@ -170,8 +170,8 @@ module Column = struct
     |> Seq.fold_left (Fun.flip List.cons) []
     = [Integer 4; Integer 3]
 
-  let set rowid col t =
-    match col, t with
+  let set col rowid value =
+    match col, value with
       NumericC (p, arr), Numeric (p', x) ->
       arr.(rowid) <-
         let d = p - p' in
@@ -183,6 +183,29 @@ module Column = struct
     | StringC arr, String s ->
       arr.(rowid) <- s
     | _, _ -> raise (Invalid_argument "bad operation")
+
+  
+  let update col f rowid =
+    get col rowid |> map f |> set col rowid
+
+  let%test _ =
+    let col = intcol_of_list [1;2;3;4] in
+    let f = ApplyOnInt (fun x -> x * 2) in
+    update col f 2;
+    col = IntegerC [|1;2;6;4|]
+
+  let%test _ =
+    let col = numcol_of_list 1 [1;2;3;4] in
+    let f = ApplyOnInt (fun x -> x * 2) in
+    update col f 2;
+    col = NumericC (1, [|1;2;6;4|])
+
+  let%test _ =
+    let col = strcol_of_list ["1";"2";"3";"4"] in
+    let f = ApplyOnStr (fun s ->  s ^ "2") in
+    update col f 2;
+    col = StringC [|"1";"2";"32";"4"|]
+
 
   let print_column limit width =
     let print field =

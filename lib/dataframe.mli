@@ -34,7 +34,7 @@ module Column : sig
   val select: (ftype -> bool) -> column -> selection
   val filter: column -> selection -> ftype Seq.t
   val get: column -> int -> ftype
-  val set: int -> column -> ftype -> unit
+  val set: column -> int -> ftype -> unit
   val print_column: int -> int -> column -> unit
 
 end
