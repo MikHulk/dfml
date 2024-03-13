@@ -148,8 +148,8 @@ module Column = struct
           Integer x -> x > 2
         | _ -> false
     )
-    |> Seq.fold_left (Fun.flip List.cons) []
-    = [3;2]
+    |> List.of_seq
+    = [2;3]
 
   let filter col sel =
     match col with
@@ -167,8 +167,8 @@ module Column = struct
       )
     in
     filter col sel
-    |> Seq.fold_left (Fun.flip List.cons) []
-    = [Integer 4; Integer 3]
+    |> List.of_seq
+    = [Integer 3;Integer 4]
 
   let set col rowid value =
     match col, value with
@@ -400,8 +400,7 @@ module Dataset = struct
       )
     in List.to_seq [0;1;2]
        |> get_columns ds
-       |> Seq.fold_left (Fun.flip List.cons) []
-       |> List.rev =
+       |> List.of_seq =
           [IntegerC [|1;2;3;4;5|]
           ;IntegerC [|1;1;2;2;2|]
           ;IntegerC [|2;8;3;9;10|]
@@ -417,8 +416,7 @@ module Dataset = struct
       )
     in List.to_seq [0;1;2]
        |> get_columns ds
-       |> Seq.fold_left (Fun.flip List.cons) []
-       |> List.rev =
+       |> List.of_seq =
           [IntegerC [|1;2;3;4;5|]
           ;NumericC (1, [|1;1;2;2;2|])
           ;StringC [|"2";"8";"3";"9";"10"|]
@@ -433,8 +431,7 @@ module Dataset = struct
         ]
       )
     in get_columns ds Seq.empty
-       |> Seq.fold_left (Fun.flip List.cons) []
-       |> List.rev = []
+       |> List.of_seq = []
 
   let%test _ =
     let
@@ -445,8 +442,7 @@ module Dataset = struct
         ]
       )
     in get_columns ds (List.to_seq [2])
-     |> Seq.fold_left (Fun.flip List.cons) []
-     |> List.rev = [StringC [|"2";"8";"3";"9";"10"|]]
+     |> List.of_seq = [StringC [|"2";"8";"3";"9";"10"|]]
 
   let%test _ =
     let
@@ -457,8 +453,7 @@ module Dataset = struct
         ]
       )
     in get_columns ds (List.to_seq [2;0])
-     |> Seq.fold_left (Fun.flip List.cons) []
-     |> List.rev =
+     |> List.of_seq =
         [ StringC [|"2";"8";"3";"9";"10"|]
         ; IntegerC [|1;2;3;4;5|]
         ]
