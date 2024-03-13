@@ -248,277 +248,283 @@ module Column = struct
 
 end
 
-open Column
-open Column.Ftype
+module Dataset = struct
+  open Column
+  open Column.Ftype
 
-type dataset =
-  | Empty
-  | Data of int * int * column array
+  type dataset =
+    | Empty
+    | Data of int * int * column array
+
+  let of_list ll =
+    match ll with
+      [] -> Empty
+    | h::t ->
+      let height = length h in
+      let width = List.length ll in
+      if List.for_all (fun col -> height = length col) t
+      then Data (height, width, (Array.of_list ll))
+      else Invalid_argument "column must have the same size"
+           |> raise
+
+  let%test _ =
+    match
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    with
+      Data _ -> true
+    | _ -> false
+
+  let get ds col row =
+    match ds with
+      Empty -> None
+    | Data (h, w, arr) ->
+      if abs col < w && abs row < h
+      then
+        let col = if col >= 0 then col else w + col
+        and row = if row >= 0 then row else h + row
+        in Some (Column.get arr.(col) row)
+      else None
+
+  let%test _ =
+    get (
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    ) 2 4 = Some(Integer 10)
+
+  let%test _ =
+    get (
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    ) (-1) (-1) = Some(Integer 10)
+
+  let%test _ =
+    get (
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    ) 2 5 = None
 
 
-let of_list ll =
-  match ll with
-    [] -> Empty
-  | h::t ->
-    let height = length h in
-    let width = List.length ll in
-    if List.for_all (fun col -> height = length col) t
-    then Data (height, width, (Array.of_list ll))
-    else Invalid_argument "column must have the same size"
-         |> raise
+  let get' ds col row =
+    match ds with
+      Empty -> raise (Invalid_argument "empty dataset")
+    | Data (_, _, arr) ->
+      Column.get arr.(col) row
 
-let%test _ =
-  match
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  with
-    Data _ -> true
-  | _ -> false
-
-let get ds col row =
-  match ds with
-    Empty -> None
-  | Data (h, w, arr) ->
-    if abs col < w && abs row < h
-    then
-      let col = if col >= 0 then col else w + col
-      and row = if row >= 0 then row else h + row
-      in Some (Column.get arr.(col) row)
-    else None
-
-let%test _ =
-  get (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) 2 4 = Some(Integer 10)
-
-let%test _ =
-  get (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) (-1) (-1) = Some(Integer 10)
-
-let%test _ =
-  get (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) 2 5 = None
-
-
-let get' ds col row =
-  match ds with
-    Empty -> raise (Invalid_argument "empty dataset")
-  | Data (_, _, arr) ->
-    Column.get arr.(col) row
-
-let%test _ =
-  get' (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) 2 4 = Integer 10
-
-let%test _ = try
+  let%test _ =
     get' (
       [[1;2;3;4;5]
       ;[1;1;2;2;2]
       ;[2;8;3;9;10]]
       |> List.map intcol_of_list
       |> of_list
-    ) 2 5 = Integer (Random.int 100)
-  with
-    Invalid_argument _ -> true
-  | _ -> false
+    ) 2 4 = Integer 10
 
-
-let get_column ds col =
-  match ds with
-    Empty -> None
-  | Data (_, w, arr) ->
-    if col < w
-    then
-      let col = if col >= 0 then col else w + col
-      in Some arr.(col)
-    else None
-
-let%test _ =
-  get_column (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) 2
-  = Some(IntegerC [|2;8;3;9;10|])
-
-let%test _ =
-  get_column (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) (-3)
-  = Some(IntegerC [|1;2;3;4;5|])
-
-let%test _ =
-  get_column (
-    [[1;2;3;4;5]
-    ;[1;1;2;2;2]
-    ;[2;8;3;9;10]]
-    |> List.map intcol_of_list
-    |> of_list
-  ) 3
-  = None
-
-
-let get_columns ds cols =
-  Seq.filter_map (get_column ds) cols
-
-let%test _ =
-  let
-    ds = of_list (
-      List.map
-        intcol_of_list
+  let%test _ = try
+      get' (
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
-    )
-  in List.to_seq [0;1;2]
-     |> get_columns ds
-     |> Seq.fold_left (Fun.flip List.cons) []
-     |> List.rev =
-        [IntegerC [|1;2;3;4;5|]
-        ;IntegerC [|1;1;2;2;2|]
-        ;IntegerC [|2;8;3;9;10|]
-        ]
-
-let%test _ =
-  let
-    ds = of_list (
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-    )
-  in List.to_seq [0;1;2]
-     |> get_columns ds
-     |> Seq.fold_left (Fun.flip List.cons) []
-     |> List.rev =
-        [IntegerC [|1;2;3;4;5|]
-        ;NumericC (1, [|1;1;2;2;2|])
-        ;StringC [|"2";"8";"3";"9";"10"|]
-        ]
-
-let%test _ =
-  let
-    ds = of_list (
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-    )
-  in get_columns ds Seq.empty
-     |> Seq.fold_left (Fun.flip List.cons) []
-     |> List.rev = []
-
-let%test _ =
-  let
-    ds = of_list (
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-    )
-  in get_columns ds (List.to_seq [2])
-   |> Seq.fold_left (Fun.flip List.cons) []
-   |> List.rev = [StringC [|"2";"8";"3";"9";"10"|]]
-
-let%test _ =
-  let
-    ds = of_list (
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-    )
-  in get_columns ds (List.to_seq [2;0])
-   |> Seq.fold_left (Fun.flip List.cons) []
-   |> List.rev =
-      [ StringC [|"2";"8";"3";"9";"10"|]
-      ; IntegerC [|1;2;3;4;5|]
-      ]
+        |> List.map intcol_of_list
+        |> of_list
+      ) 2 5 = Integer (Random.int 100)
+    with
+      Invalid_argument _ -> true
+    | _ -> false
 
 
-let get_row ds row =
-  match ds with
-    Empty -> None
-  | Data (h, _, arr) ->
-    if abs row < h
-    then
-      let row = if row < 0 then h + row else row in
-      Some (Array.map (fun col -> Column.get col row) arr)
-    else None
+  let get_column ds col =
+    match ds with
+      Empty -> None
+    | Data (_, w, arr) ->
+      if col < w
+      then
+        let col = if col >= 0 then col else w + col
+        in Some arr.(col)
+      else None
 
-let%test _ =
-  get_row (
-    List.map
-      intcol_of_list
+  let%test _ =
+    get_column (
       [[1;2;3;4;5]
       ;[1;1;2;2;2]
       ;[2;8;3;9;10]]
-    |> of_list
-  ) 2 = Some([|Integer 3;Integer 2;Integer 3|])
+      |> List.map intcol_of_list
+      |> of_list
+    ) 2
+    = Some(IntegerC [|2;8;3;9;10|])
 
-let%test _ =
-  get_row (
-    of_list
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-  ) 2 = Some([|Integer 3;Numeric (1, 2);String "3"|])
+  let%test _ =
+    get_column (
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    ) (-3)
+    = Some(IntegerC [|1;2;3;4;5|])
 
-let%test _ =
-  get_row (
-    of_list
-      [ intcol_of_list [1;2;3;4;5]
-      ; numcol_of_list 1 [1;1;2;2;2]
-      ; strcol_of_list ["2";"8";"3";"9";"10"]
-      ]
-  ) (-3) = Some([|Integer 3;Numeric (1, 2);String "3"|])
+  let%test _ =
+    get_column (
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+      |> List.map intcol_of_list
+      |> of_list
+    ) 3
+    = None
 
-let%test _ =
-  get_row (
-    of_list (
+
+  let get_columns ds cols =
+    Seq.filter_map (get_column ds) cols
+
+  let%test _ =
+    let
+      ds = of_list (
+        List.map
+          intcol_of_list
+          [[1;2;3;4;5]
+          ;[1;1;2;2;2]
+          ;[2;8;3;9;10]]
+      )
+    in List.to_seq [0;1;2]
+       |> get_columns ds
+       |> Seq.fold_left (Fun.flip List.cons) []
+       |> List.rev =
+          [IntegerC [|1;2;3;4;5|]
+          ;IntegerC [|1;1;2;2;2|]
+          ;IntegerC [|2;8;3;9;10|]
+          ]
+
+  let%test _ =
+    let
+      ds = of_list (
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+      )
+    in List.to_seq [0;1;2]
+       |> get_columns ds
+       |> Seq.fold_left (Fun.flip List.cons) []
+       |> List.rev =
+          [IntegerC [|1;2;3;4;5|]
+          ;NumericC (1, [|1;1;2;2;2|])
+          ;StringC [|"2";"8";"3";"9";"10"|]
+          ]
+
+  let%test _ =
+    let
+      ds = of_list (
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+      )
+    in get_columns ds Seq.empty
+       |> Seq.fold_left (Fun.flip List.cons) []
+       |> List.rev = []
+
+  let%test _ =
+    let
+      ds = of_list (
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+      )
+    in get_columns ds (List.to_seq [2])
+     |> Seq.fold_left (Fun.flip List.cons) []
+     |> List.rev = [StringC [|"2";"8";"3";"9";"10"|]]
+
+  let%test _ =
+    let
+      ds = of_list (
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+      )
+    in get_columns ds (List.to_seq [2;0])
+     |> Seq.fold_left (Fun.flip List.cons) []
+     |> List.rev =
+        [ StringC [|"2";"8";"3";"9";"10"|]
+        ; IntegerC [|1;2;3;4;5|]
+        ]
+
+
+  let get_row ds row =
+    match ds with
+      Empty -> None
+    | Data (h, _, arr) ->
+      if abs row < h
+      then
+        let row = if row < 0 then h + row else row in
+        Some (Array.map (fun col -> Column.get col row) arr)
+      else None
+
+  let%test _ =
+    get_row (
       List.map
         intcol_of_list
         [[1;2;3;4;5]
         ;[1;1;2;2;2]
         ;[2;8;3;9;10]]
-    )
-  ) 0 = Some([|Integer 1;Integer 1;Integer 2|])
+      |> of_list
+    ) 2 = Some([|Integer 3;Integer 2;Integer 3|])
 
-let%test _ = get_row (
-    of_list (
-      List.map
-        intcol_of_list
-        [[1;2;3;4;5]
-        ;[1;1;2;2;2]
-        ;[2;8;3;9;10]]
-    )
-  ) 5 = None
+  let%test _ =
+    get_row (
+      of_list
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+    ) 2 = Some([|Integer 3;Numeric (1, 2);String "3"|])
+
+  let%test _ =
+    get_row (
+      of_list
+        [ intcol_of_list [1;2;3;4;5]
+        ; numcol_of_list 1 [1;1;2;2;2]
+        ; strcol_of_list ["2";"8";"3";"9";"10"]
+        ]
+    ) (-3) = Some([|Integer 3;Numeric (1, 2);String "3"|])
+
+  let%test _ =
+    get_row (
+      of_list (
+        List.map
+          intcol_of_list
+          [[1;2;3;4;5]
+          ;[1;1;2;2;2]
+          ;[2;8;3;9;10]]
+      )
+    ) 0 = Some([|Integer 1;Integer 1;Integer 2|])
+
+  let%test _ = get_row (
+      of_list (
+        List.map
+          intcol_of_list
+          [[1;2;3;4;5]
+          ;[1;1;2;2;2]
+          ;[2;8;3;9;10]]
+      )
+    ) 5 = None
+
+end
+
+open Dataset
+
+type dataframe = dataset * int Seq.t * int Seq.t
