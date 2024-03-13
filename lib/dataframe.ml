@@ -525,6 +525,58 @@ module Dataset = struct
 
 end
 
+open Column
 open Dataset
 
 type dataframe = dataset * int Seq.t * int Seq.t
+
+
+let columns (ds, cols, rows) =
+  Seq.map
+    ( fun col ->
+        Seq.filter_map (get ds col) rows
+        |> List.of_seq
+    ) cols
+
+let%test _ =
+  let df =
+    ( of_list
+        ( List.map
+            intcol_of_list
+            [[1;2;3;4;5]
+            ;[1;1;2;2;2]
+            ;[2;8;3;9;10]]
+        )
+    , List.to_seq [0;1]
+    , List.to_seq [0;2;4]
+    )
+  in columns df
+     |> List.of_seq =
+        [[Integer 1;Integer 3;Integer 5]
+        ;[Integer 1;Integer 2;Integer 2]]
+
+
+let rows (ds, cols, rows) =
+  Seq.map
+    ( fun row ->
+        Seq.filter_map (fun col -> get ds col row) cols
+        |> List.of_seq
+    ) rows
+
+let%test _ =
+  let df =
+    ( of_list
+        ( List.map
+            intcol_of_list
+            [[1;2;3;4;5]
+            ;[1;1;2;2;2]
+            ;[2;8;3;9;10]]
+        )
+    , List.to_seq [0;1]
+    , List.to_seq [0;2;4]
+    )
+  in rows df
+     |> List.of_seq =
+        [[Integer 1;Integer 1]
+        ;[Integer 3;Integer 2]
+        ;[Integer 5;Integer 2]]

@@ -60,6 +60,10 @@ module Dataset : sig
 
 end
 
+open Column.Ftype
 open Dataset
 
 type dataframe = dataset * int Seq.t * int Seq.t
+
+val columns: dataframe -> ftype list Seq.t
+val rows: dataframe -> ftype list Seq.t
