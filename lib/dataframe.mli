@@ -49,9 +49,7 @@ module Dataset : sig
   open Column
   open Column.Ftype
 
-  type dataset =
-    | Empty
-    | Data of int * int * column array
+  type dataset = int * int * column array
 
   val of_list: column list -> dataset
   val get: dataset -> int -> int -> ftype option

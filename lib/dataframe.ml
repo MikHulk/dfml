@@ -252,42 +252,41 @@ module Dataset = struct
   open Column
   open Column.Ftype
 
-  type dataset =
-    | Empty
-    | Data of int * int * column array
+  type dataset = int * int * column array
 
   let of_list ll =
     match ll with
-      [] -> Empty
+      [] -> (0, 0, [||])
     | h::t ->
       let height = length h in
       let width = List.length ll in
       if List.for_all (fun col -> height = length col) t
-      then Data (height, width, (Array.of_list ll))
+      then (height, width, (Array.of_list ll))
       else Invalid_argument "column must have the same size"
            |> raise
 
   let%test _ =
-    match
+    (
       [[1;2;3;4;5]
       ;[1;1;2;2;2]
       ;[2;8;3;9;10]]
       |> List.map intcol_of_list
       |> of_list
-    with
-      Data _ -> true
-    | _ -> false
-
-  let get ds col row =
-    match ds with
-      Empty -> None
-    | Data (h, w, arr) ->
-      if abs col < w && abs row < h
-      then
-        let col = if col >= 0 then col else w + col
-        and row = if row >= 0 then row else h + row
-        in Some (Column.get arr.(col) row)
-      else None
+    ) =
+    ( 5
+    , 3
+    , [|IntegerC [|1;2;3;4;5|]
+      ; IntegerC [|1;1;2;2;2|]
+      ; IntegerC [|2;8;3;9;10|]|]
+    )
+    
+  let get (h, w, arr) col row =
+    if abs col < w && abs row < h
+    then
+      let col = if col >= 0 then col else w + col
+      and row = if row >= 0 then row else h + row
+      in Some (Column.get arr.(col) row)
+    else None
 
   let%test _ =
     get (
@@ -317,11 +316,8 @@ module Dataset = struct
     ) 2 5 = None
 
 
-  let get' ds col row =
-    match ds with
-      Empty -> raise (Invalid_argument "empty dataset")
-    | Data (_, _, arr) ->
-      Column.get arr.(col) row
+  let get' (_, _, arr) col row =
+    Column.get arr.(col) row
 
   let%test _ =
     get' (
@@ -345,15 +341,12 @@ module Dataset = struct
     | _ -> false
 
 
-  let get_column ds col =
-    match ds with
-      Empty -> None
-    | Data (_, w, arr) ->
-      if col < w
-      then
-        let col = if col >= 0 then col else w + col
-        in Some arr.(col)
-      else None
+  let get_column (_, w, arr) col =
+    if col < w
+    then
+      let col = if col >= 0 then col else w + col
+      in Some arr.(col)
+    else None
 
   let%test _ =
     get_column (
@@ -401,9 +394,9 @@ module Dataset = struct
     in List.to_seq [0;1;2]
        |> get_columns ds
        |> List.of_seq =
-          [IntegerC [|1;2;3;4;5|]
-          ;IntegerC [|1;1;2;2;2|]
-          ;IntegerC [|2;8;3;9;10|]
+          [ IntegerC [|1;2;3;4;5|]
+          ; IntegerC [|1;1;2;2;2|]
+          ; IntegerC [|2;8;3;9;10|]
           ]
 
   let%test _ =
@@ -417,9 +410,9 @@ module Dataset = struct
     in List.to_seq [0;1;2]
        |> get_columns ds
        |> List.of_seq =
-          [IntegerC [|1;2;3;4;5|]
-          ;NumericC (1, [|1;1;2;2;2|])
-          ;StringC [|"2";"8";"3";"9";"10"|]
+          [ IntegerC [|1;2;3;4;5|]
+          ; NumericC (1, [|1;1;2;2;2|])
+          ; StringC [|"2";"8";"3";"9";"10"|]
           ]
 
   let%test _ =
@@ -459,15 +452,12 @@ module Dataset = struct
         ]
 
 
-  let get_row ds row =
-    match ds with
-      Empty -> None
-    | Data (h, _, arr) ->
-      if abs row < h
-      then
-        let row = if row < 0 then h + row else row in
-        Some (Array.map (fun col -> Column.get col row) arr)
-      else None
+  let get_row (h, _, arr) row =
+    if abs row < h
+    then
+      let row = if row < 0 then h + row else row in
+      Some (Array.map (fun col -> Column.get col row) arr)
+    else None
 
   let%test _ =
     get_row (
