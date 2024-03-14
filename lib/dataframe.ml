@@ -279,7 +279,7 @@ module Dataset = struct
       ; IntegerC [|1;1;2;2;2|]
       ; IntegerC [|2;8;3;9;10|]|]
     )
-    
+
   let get (h, w, arr) col row =
     if abs col < w && abs row < h
     then
@@ -565,3 +565,24 @@ let%test _ =
         [[Integer 1;Integer 1]
         ;[Integer 3;Integer 2]
         ;[Integer 5;Integer 2]]
+
+let of_dataset (h, w, arr)  =
+  ( (h, w, arr)
+  , Seq.ints 0 |> Seq.take w
+  , Seq.ints 0 |> Seq.take h
+  )
+
+let%test _ =
+  let ds =
+    of_list
+      ( List.map
+          intcol_of_list
+          [[1;2;3;4;5]
+          ;[1;1;2;2;2]
+          ;[2;8;3;9;10]]
+      )
+  in
+  let (ds', cols, rows) = of_dataset ds in
+  ds = ds'
+  && List.of_seq cols = [0;1;2]
+  && List.of_seq rows = [0;1;2;3;4]

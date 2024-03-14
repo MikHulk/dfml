@@ -65,3 +65,5 @@ type dataframe = dataset * int Seq.t * int Seq.t
 
 val columns_to_seq: dataframe -> ftype list Seq.t
 val rows_to_seq: dataframe -> ftype list Seq.t
+
+val of_dataset: dataset -> dataframe
