@@ -65,5 +65,5 @@ open Dataset
 
 type dataframe = dataset * int Seq.t * int Seq.t
 
-val columns: dataframe -> ftype list Seq.t
-val rows: dataframe -> ftype list Seq.t
+val columns_to_seq: dataframe -> ftype list Seq.t
+val rows_to_seq: dataframe -> ftype list Seq.t

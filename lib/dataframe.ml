@@ -526,7 +526,7 @@ open Dataset
 type dataframe = dataset * int Seq.t * int Seq.t
 
 
-let columns (ds, cols, rows) =
+let columns_to_seq (ds, cols, rows) =
   Seq.map
     ( fun col ->
         Seq.filter_map (get ds col) rows
@@ -545,13 +545,13 @@ let%test _ =
     , List.to_seq [0;1]
     , List.to_seq [0;2;4]
     )
-  in columns df
+  in columns_to_seq df
      |> List.of_seq =
         [[Integer 1;Integer 3;Integer 5]
         ;[Integer 1;Integer 2;Integer 2]]
 
 
-let rows (ds, cols, rows) =
+let rows_to_seq (ds, cols, rows) =
   Seq.map
     ( fun row ->
         Seq.filter_map (fun col -> get ds col row) cols
@@ -570,7 +570,7 @@ let%test _ =
     , List.to_seq [0;1]
     , List.to_seq [0;2;4]
     )
-  in rows df
+  in rows_to_seq df
      |> List.of_seq =
         [[Integer 1;Integer 1]
         ;[Integer 3;Integer 2]
