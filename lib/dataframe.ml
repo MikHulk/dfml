@@ -566,6 +566,7 @@ let%test _ =
         ;[Integer 3;Integer 2]
         ;[Integer 5;Integer 2]]
 
+
 let of_dataset (h, w, arr)  =
   ( (h, w, arr)
   , Seq.ints 0 |> Seq.take w
@@ -586,3 +587,23 @@ let%test _ =
   ds = ds'
   && List.of_seq cols = [0;1;2]
   && List.of_seq rows = [0;1;2;3;4]
+
+let filter_columns f (ds, colids, rowids) =
+  let apply id =
+    match get_column ds id with
+      None -> Invalid_argument "inconsistent dataframe" |> raise
+    | Some column -> f id column
+  in (ds, Seq.filter apply colids, rowids)
+
+let%test _ =
+  let df =
+    List.map
+      intcol_of_list
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+    |> of_list |> of_dataset
+  in filter_columns (fun i _ -> i = 1) df
+     |> columns_to_seq
+     |> List.of_seq
+        = [[Integer 1;Integer 1;Integer 2;Integer 2;Integer 2]]

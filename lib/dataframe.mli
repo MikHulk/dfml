@@ -58,6 +58,7 @@ module Dataset : sig
 
 end
 
+open Column
 open Column.Ftype
 open Dataset
 
@@ -67,3 +68,4 @@ val columns_to_seq: dataframe -> ftype list Seq.t
 val rows_to_seq: dataframe -> ftype list Seq.t
 
 val of_dataset: dataset -> dataframe
+val filter_columns: (int -> column -> bool) -> dataframe -> dataframe
