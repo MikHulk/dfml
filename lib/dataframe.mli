@@ -58,14 +58,8 @@ module Dataset : sig
 
 end
 
-open Column.Ftype
-open Dataset
+module IntSet : sig
+  type t
+end
 
-type dataframe = dataset * int Seq.t * int Seq.t
-
-val columns_to_seq: dataframe -> ftype list Seq.t
-val rows_to_seq: dataframe -> ftype list Seq.t
-
-val of_dataset: dataset -> dataframe
-val filter_columns: (int -> ftype Seq.t -> bool) -> dataframe -> dataframe
-val get_columns: int Seq.t -> dataframe -> dataframe
+type dataframe = Dataset.dataset * IntSet.t * IntSet.t
