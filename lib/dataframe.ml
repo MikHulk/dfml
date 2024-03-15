@@ -511,6 +511,7 @@ module Dataset = struct
 end
 
 open Column
+open Column.Ftype
 open Dataset
 
 type dataframe = dataset * int Seq.t * int Seq.t
@@ -589,10 +590,16 @@ let%test _ =
   && List.of_seq rows = [0;1;2;3;4]
 
 let filter_columns f (ds, colids, rowids) =
-  let apply id =
-    match get_column ds id with
+  let get_row column =
+    Seq.map
+      (fun rowid -> Column.get column rowid)
+      rowids
+  in
+  let apply colid =
+    match get_column ds colid with
       None -> Invalid_argument "inconsistent dataframe" |> raise
-    | Some column -> f id column
+    | Some column ->
+      get_row column |> f colid
   in (ds, Seq.filter apply colids, rowids)
 
 let%test _ =
@@ -607,3 +614,61 @@ let%test _ =
      |> columns_to_seq
      |> List.of_seq
         = [[Integer 1;Integer 1;Integer 2;Integer 2;Integer 2]]
+
+let%test _ =
+  let df =
+    List.map
+      intcol_of_list
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+    |> of_list |> of_dataset
+  in filter_columns
+    ( fun _ seq ->
+       ( Seq.fold_left
+           ( fun acc f ->
+               match f with
+                 Integer x -> acc + x
+               | _ -> acc
+           )
+           0
+           seq
+       ) > 15
+    )
+    df
+     |> columns_to_seq
+     |> List.of_seq
+        = [[Integer 2;Integer 8;Integer 3;Integer 9;Integer 10]]
+
+
+let get_columns colids (ds, _, rowids) = (ds, colids, rowids)
+
+let%test _ =
+  let df =
+    List.map
+      intcol_of_list
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+    |> of_list |> of_dataset
+  in get_columns (List.to_seq [0;2]) df
+     |> columns_to_seq
+     |> List.of_seq
+        =  [[Integer 1;Integer 2;Integer 3;Integer 4;Integer 5]
+           ;[Integer 2;Integer 8;Integer 3;Integer 9;Integer 10]
+           ]
+
+let%test _ =
+  let df =
+    List.map
+      intcol_of_list
+      [[1;2;3;4;5]
+      ;[1;1;2;2;2]
+      ;[2;8;3;9;10]]
+    |> of_list |> of_dataset
+  in get_columns (List.to_seq [2;0]) df
+     |> columns_to_seq
+     |> List.of_seq
+        =  [[Integer 2;Integer 8;Integer 3;Integer 9;Integer 10]
+           ;[Integer 1;Integer 2;Integer 3;Integer 4;Integer 5]
+           ]
