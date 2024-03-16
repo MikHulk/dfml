@@ -7,11 +7,20 @@ module Ftype: sig
     | Integer of int
     | Numeric of (int * int)
     | String of string
-
+  type f
   val of_int: int -> t
   val num_of_int: int -> int -> t
   val num_of_float: int -> float -> t
   val of_string: string -> t
+  val from_int_to_int: (int -> int) -> f
+  val from_int_to_float: (int -> float) -> f
+  val from_int_to_str: (int -> string) -> f
+  val from_float_to_float: (float -> float) -> f
+  val from_float_to_int: (float -> int) -> f
+  val from_float_to_str: (float -> string) -> f
+  val from_str_to_str: (string -> string) -> f
+  val from_str_to_int: (string -> int) -> f
+  val map: f -> t -> t
 end
 
 module Serie: sig

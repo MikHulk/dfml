@@ -5,6 +5,16 @@ module Ftype = struct
     | Numeric of (int * int)
     | String of string
 
+  type f =
+    | I_I of (int -> int)
+    | I_F of (int -> float)
+    | I_S of (int -> string)
+    | F_F of (float -> float)
+    | F_I of (float -> int)
+    | F_S of (float -> string)
+    | S_S of (string -> string)
+    | S_I of (string -> int)
+
   let of_int x = Integer x
   let%test _ = of_int 42 = Integer 42
 
@@ -18,6 +28,37 @@ module Ftype = struct
 
   let of_string s = String s
   let%test _ = of_string "hello" = String "hello"
+
+  let from_int_to_int f = I_I f
+  let from_int_to_float f = I_F f
+  let from_int_to_str f = I_S f
+
+  let from_float_to_float f = F_F f
+  let from_float_to_int f = F_I f
+  let from_float_to_str f = F_S f
+
+  let from_str_to_str f = S_S f
+  let from_str_to_int f = S_I f
+
+  let map f ftype =
+    match f, ftype with
+    | I_I f, Integer x -> Integer (f x)
+    | I_S f, Integer x -> String (f x)
+    | I_I f, Numeric(p, x) -> Numeric(p, f x)
+    | I_F f, Numeric(p, x) -> f x |> num_of_float p
+    | I_S f, Numeric(_, x) -> String (f x)
+    | F_F f, Numeric(p, x) ->
+      let x' = f (Float.of_int (x) *. 10. ** -.(Float.of_int p)) in
+      num_of_float p x'
+    | F_I f, Numeric(p, x) ->
+      let x' = f (Float.of_int (x) *. 10. ** -.(Float.of_int p)) in
+      Integer x'
+    | F_S f, Numeric(p, x) ->
+      let x' = f (Float.of_int (x) *. 10. ** -.(Float.of_int p)) in
+      String x'
+    | S_S f, String s -> String (f s)
+    | S_I f, String s -> Integer (f s)
+    | _ -> raise (Invalid_argument "function is incompatible")
 
 end
 
