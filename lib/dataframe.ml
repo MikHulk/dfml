@@ -117,6 +117,29 @@ module Serie = struct
           ; String "4"
           ; String "5"
          |]
+
+  let derive f serie =
+    let seq =
+      match serie with
+      | Source arr -> Array.to_seq arr
+      | Derived seq -> seq
+    in
+    Derived (Seq.map (Ftype.map f) seq)
+  let%test _ =
+    let serie' =
+      List.to_seq [ "a"; "ab"; "abc"; "abcd"; "abcde" ]
+      |> of_string_seq
+      |> derive ( Ftype.from_str_to_int String.length ) in
+    match serie' with
+    | Derived seq ->
+      List.of_seq seq = [ Integer 1
+                        ; Integer 2
+                        ; Integer 3
+                        ; Integer 4
+                        ; Integer 5
+                        ]
+    | _ -> false
+
 end
 
 module IntSet = Set.Make(Int)

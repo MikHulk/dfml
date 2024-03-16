@@ -32,6 +32,8 @@ module Serie: sig
   val nums_of_int_seq: int -> int Seq.t -> t
   val nums_of_float_seq: int -> float Seq.t -> t
   val of_string_seq: string Seq.t -> t
+
+  val derive: Ftype.f -> t -> t
 end
 
 type dataframe = Serie.t list * IntSet.t
