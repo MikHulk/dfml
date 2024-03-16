@@ -1,5 +1,10 @@
 ## An example for the record
 
+> [!CAUTION]
+> The folowing is obsolete. 
+>
+> I've kept it for the moment in order to help with the refactoring.
+
 first we build a dataset with 3 columns:
 
 ```ocaml
