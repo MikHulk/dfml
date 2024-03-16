@@ -16,6 +16,6 @@
  (synopsis "Dataframe with ocaml à la Polars.")
  (description "A little dataframe library for filtering, \
                selecting and transforming heterogenous data in place")
- (depends ocaml dune)
+ (depends ocaml dune (alcotest :with-test))
  (tags
   (data)))

@@ -139,7 +139,6 @@ module Serie = struct
                         ; Integer 5
                         ]
     | _ -> false
-
 end
 
 module IntSet = Set.Make(Int)

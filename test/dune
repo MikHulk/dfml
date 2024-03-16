@@ -1,2 +1,4 @@
 (test
- (name test_dataframe))
+ (name test_dataframe)
+ (libraries dataframe alcotest)
+)

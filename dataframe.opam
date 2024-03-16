@@ -11,6 +11,7 @@ bug-reports: "https://github.com/MikHulk/dfml/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.14"}
+  "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [
