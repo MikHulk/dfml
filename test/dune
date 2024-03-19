@@ -1,4 +1,5 @@
 (test
- (name test_dataframe)
+ (name serie)
  (libraries dataframe alcotest)
 )
+

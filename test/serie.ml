@@ -6,7 +6,7 @@ let pprint_ftype ppf = function
 let ftype_eq a b = (a=b)
 
 let ftype_testable = Alcotest.testable pprint_ftype ftype_eq
-
+    
 let (>>) f g x = g(f(x))
 
 let test_derive_int_to_int () =
@@ -224,7 +224,7 @@ let () = let open Alcotest in
         "derive numerics to integers processing as float"
         `Quick test_derive_numerics_to_integers_process_float;
       test_case
-        "derive numerics to strings processing as float"
+        "derive numerics to stgs processing as float"
         `Quick test_derive_numerics_to_strings_process_float;
       test_case
         "derive strings to strings"
