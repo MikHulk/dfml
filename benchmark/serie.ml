@@ -1,4 +1,4 @@
-let it = 800_000_000
+let it = 100_000_000
 
 let time f =
     let t = Sys.time() in
@@ -36,12 +36,11 @@ let string_serie_stress_test () =
       (Dataframe.Ftype.from_int_to_str Int.to_string) in
   time f
 
-let wrapper title f =
-  print_newline () ;
+
+let report title t c =
   print_string "===========================================================";
   print_newline () ;
   Printf.printf "%#d %s\n" it title;
-  let (t, c) = f () in
   Printf.printf "Execution time: %fs\n" t;
   Printf.printf "memory consumption: %fwords\n" c;
   print_newline ()
@@ -49,7 +48,13 @@ let wrapper title f =
 
 let () =
   let t = Sys.time() in
-  wrapper "integer serie stress test" integer_serie_stress_test ;
-  wrapper "numeric serie stress test" numeric_serie_stress_test ;
-  wrapper "string serie stress test" string_serie_stress_test ;
+  let job1 = Domain.spawn integer_serie_stress_test in
+  let job2 = Domain.spawn numeric_serie_stress_test in
+  let job3 = Domain.spawn string_serie_stress_test in
+  let t3, c3 = Domain.join job3 in
+  let t2, c2 = Domain.join job2 in
+  let t1, c1 = Domain.join job1 in
+  report "integer serie stress test" t1 c1;
+  report "numeric serie stress test" t2 c2;
+  report "string serie stress test" t3 c3;
   Printf.printf "Total execution time: %fs\n" (Sys.time() -. t)
