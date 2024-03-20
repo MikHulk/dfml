@@ -1,4 +1,4 @@
-(test
+(executable
  (name serie)
  (libraries dataframe)
 )
