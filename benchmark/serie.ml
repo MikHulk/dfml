@@ -2,8 +2,11 @@ let it = 800_000_000
 
 let time f =
     let t = Sys.time() in
+    let (minor, major, promo) = Gc.counters () in
     let _ = f () in
-    Printf.printf "Execution time: %fs\n" (Sys.time() -. t)
+    let (minor', major', promo') = Gc.counters () in
+    let consumption = (minor' -. minor) +. (major' -. major) -. (promo' -. promo) in
+    Sys.time() -. t, consumption
     
 let integer_serie_stress_test () =
   let f = fun () ->
@@ -33,43 +36,20 @@ let string_serie_stress_test () =
       (Dataframe.Ftype.from_int_to_str Int.to_string) in
   time f
 
+let wrapper title f =
+  print_newline () ;
+  print_string "===========================================================";
+  print_newline () ;
+  Printf.printf "%#d %s\n" it title;
+  let (t, c) = f () in
+  Printf.printf "Execution time: %fs\n" t;
+  Printf.printf "memory consumption: %fwords\n" c;
+  print_newline ()
+  
+
 let () =
   let t = Sys.time() in
-  let (minor, major, promo) = Gc.counters () in
-  print_newline () ;
-  
-  print_string "===========================================================";
-  print_newline () ;
-  Printf.printf "%#d integers serie stress test\n" it;
-  integer_serie_stress_test ();
-  let (minor', major', promo') = Gc.counters () in
-  let consumption = (minor' -. minor) +. (major' -. major) -. (promo' -. promo) in
-  let (minor, major, promo) = (minor', major', promo') in
-  Printf.printf "memory consumption: %#fwords\n" consumption;
-  print_newline () ;
-  print_string "===========================================================";
-  print_newline () ;
-  
-  Printf.printf "%#d numerics serie stress test\n" it;
-  print_newline () ;
-  numeric_serie_stress_test ();
-  let (minor', major', promo') = Gc.counters () in
-  let consumption =
-    (minor' -. minor) +. (major' -. major) -. (promo' -. promo) in
-  let (minor, major, promo) = (minor', major', promo') in
-  Printf.printf "memory consumption: %#fwords\n" consumption;
-  print_newline () ;
-  print_string "===========================================================";
-  print_newline () ;
-  
-  Printf.printf "%#d strings serie stress test\n" it;
-  print_newline () ;
-  string_serie_stress_test ();
-  let (minor', major', promo') = Gc.counters () in
-  let consumption = (minor' -. minor) +. (major' -. major) -. (promo' -. promo) in
-  Printf.printf "memory consumption: %#fwords\n" consumption;
-  print_newline () ;
-  print_string "===========================================================";
-  print_newline () ;
-  
+  wrapper "integer serie stress test" integer_serie_stress_test ;
+  wrapper "numeric serie stress test" numeric_serie_stress_test ;
+  wrapper "string serie stress test" string_serie_stress_test ;
   Printf.printf "Total execution time: %fs\n" (Sys.time() -. t)
