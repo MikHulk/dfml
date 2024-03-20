@@ -37,6 +37,7 @@ module Serie: sig
   val of_string_seq: string Seq.t -> t
 
   val derive: Ftype.f -> t -> t
+  val merge: (Ftype.t -> Ftype.t -> 'a) -> t -> t -> 'a Seq.t
 end
 
 type dataframe = Serie.t list * IntSet.t

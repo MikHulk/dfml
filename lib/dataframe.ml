@@ -164,6 +164,25 @@ module Serie = struct
     in
     Derived (Seq.map (Ftype.map f) seq)
 
+  let merge f left right =
+    match left, right with
+    | Source arr, Source arr' ->
+      let seq_left = Array.to_seq arr in
+      let seq_right = Array.to_seq arr' in
+      Seq.zip seq_left seq_right
+      |> Seq.map (fun (l, r) -> f l r)
+    | Source arr, Derived seq_left ->
+      let seq_right = Array.to_seq arr in
+      Seq.zip seq_left seq_right
+      |> Seq.map (fun (l, r) -> f l r)
+    | Derived seq_left, Source arr ->
+      let seq_right = Array.to_seq arr in
+      Seq.zip seq_left seq_right
+      |> Seq.map (fun (l, r) -> f l r)
+    | Derived seq_left, Derived seq_right ->
+      Seq.zip seq_left seq_right
+      |> Seq.map (fun (l, r) -> f l r)
+
 end
 
 module IntSet = Set.Make(Int)
