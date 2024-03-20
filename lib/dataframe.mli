@@ -8,6 +8,9 @@ module Ftype: sig
     | Numeric of (int * int)
     | String of string
   type f
+  val to_int: t -> int
+  val to_float: t -> float
+  val to_string: t -> string
   val of_int: int -> t
   val num_of_int: int -> int -> t
   val num_of_float: int -> float -> t

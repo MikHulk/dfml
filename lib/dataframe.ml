@@ -15,6 +15,44 @@ module Ftype = struct
     | S_S of (string -> string)
     | S_I of (string -> int)
 
+  let to_int = function
+    | Integer x -> x
+    | Numeric(_, x) -> x
+    | String _ -> raise @@ Invalid_argument "string cannot be converted"
+  let%test _ = to_int (Integer 42) = 42
+  let%test _ = to_int @@ Numeric(1, 42) = 42
+  let%test _ =
+    try to_int @@ String "42" = 51 with
+    | Invalid_argument _ -> true
+    | _ -> false
+
+  let to_float = function
+    | Integer x -> Float.of_int x
+    | Numeric(p, x) -> (Float.of_int x) /. (10. ** (Float.of_int p))
+    | String _ -> raise (Invalid_argument "string cannot be converted")
+  let%test _ = to_float @@ Integer 42 = 42.
+  let%test _ = to_float @@ Numeric(1, 42) = 4.2
+  let%test _ =
+    try to_float @@ String "42" = 5.1 with
+    | Invalid_argument _ -> true
+    | _ -> false
+
+  let to_string = function
+    | Integer x -> Int.to_string x
+    | Numeric(p, x) ->
+      let divider = 10. ** (Float.of_int p) |> Float.to_int in
+      let int_part = x / divider |> Int.to_string in
+      let dec_part = x mod divider |> Int.to_string in
+      let l = String.length dec_part in
+      int_part ^ "." ^ (String.make (p - l) '0') ^ dec_part
+    | String s -> s
+  let%test _ = to_string @@ Integer 42 = "42"
+  let%test _ = to_string @@ Numeric(1, 42) = "4.2"
+  let%test _ = to_string @@ Numeric(2, 42) = "0.42"
+  let%test _ = to_string @@ Numeric(5, 42) = "0.00042"
+  let%test _ = to_string @@ Numeric(15, 42) = "0.000000000000042"
+  let%test _ = to_string @@ String "42" = "42"
+
   let of_int x = Integer x
   let%test _ = of_int 42 = Integer 42
 
