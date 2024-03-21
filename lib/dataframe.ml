@@ -156,6 +156,14 @@ module Serie = struct
           ; String "5"
          |]
 
+  let length = function
+    | Source arr -> Array.length arr
+    | Derived seq -> Seq.length seq
+
+  let to_seq = function
+    | Source arr -> Array.to_seq arr
+    | Derived seq -> seq
+
   let derive f serie =
     let seq =
       match serie with
@@ -188,3 +196,53 @@ end
 module IntSet = Set.Make(Int)
 
 type dataframe = Serie.t list * IntSet.t
+
+let of_list = function
+  | [] -> ([], IntSet.empty)
+  | h :: t ->
+    let len = Serie.length h in
+    if List.for_all (fun seq -> Serie.length seq = len) t then
+      (h::t, Serie.to_seq h |> Seq.mapi (fun i _ -> i) |> IntSet.of_seq)
+    else raise @@ Invalid_argument "series are incompatible"
+let%test _ =
+  let serie =
+    List.to_seq
+      [ 0.
+      ; Float.pi /. 3.
+      ; Float.pi /. 2.
+      ; 2. *. Float.pi /. 3.
+      ; Float.pi
+      ]
+    |> Serie.nums_of_float_seq 4 in
+  let (l, s) = of_list
+    [ serie
+    ; Serie.derive
+        ( Ftype.from_float_to_float cos )
+        serie
+    ; Serie.derive
+        ( Ftype.from_float_to_float sin )
+        serie
+    ] in
+  let s1 = List.hd l |> Serie.to_seq |> List.of_seq in
+  let s2 = List.nth l 1 |> Serie.to_seq |> List.of_seq in
+  let s3 = List.nth l 2 |> Serie.to_seq |> List.of_seq in
+  IntSet.to_seq s |> Seq.length = 5
+  && List.length l = 3
+  && s1 = [ Numeric (4, 0)
+           ; Numeric (4, 10472)
+           ; Numeric (4, 15708)
+           ; Numeric (4, 20944)
+           ; Numeric (4, 31416)
+          ]
+  && s2 = [ Numeric (4, 10000)
+          ; Numeric (4, 5000)
+          ; Numeric (4, 0)
+          ; Numeric (4, -5000)
+          ; Numeric (4, -10000)
+          ]
+  && s3 = [ Numeric(4, 0)
+          ; Numeric(4, 8660)
+          ; Numeric(4, 10000)
+          ; Numeric(4, 8660)
+          ; Numeric(4, 0)
+          ]
