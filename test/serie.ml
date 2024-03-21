@@ -21,7 +21,7 @@ let test_derive_int_to_int () =
       List.of_seq seq
     | _ -> [] in
   Alcotest.(check (list ftype_testable))
-    "should return perform `8x + 2` from Integer serie"
+    "should return perform `8(x + 2)` from Integer serie"
     [ Integer 24; Integer 32; Integer 40; Integer 48; Integer 56; Integer 64 ]
     res
     
