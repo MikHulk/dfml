@@ -56,7 +56,7 @@ let test_merge_numerics () =
     res
 
 let () = let open Alcotest in
-  run "Dataframe" [
+  run "Merge serie" [
     "test serie merging", [
       test_case "merge 2 string series" `Quick test_merge_strings;
       test_case "merge 2 integer series" `Quick test_merge_integers;

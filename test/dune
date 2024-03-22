@@ -1,4 +1,4 @@
 (tests
- (names serie merge)
+ (names serie merge dataframe_tests)
  (libraries dataframe alcotest)
 )

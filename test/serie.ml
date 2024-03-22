@@ -204,7 +204,7 @@ let test_derive_strings_to_strings () =
     res
 
 let () = let open Alcotest in
-  run "Dataframe" [
+  run "Serie" [
     "test serie derivation", [
       test_case "derive integers to integers" `Quick test_derive_int_to_int;
       test_case "derive integers to strings" `Quick test_derive_int_to_string;

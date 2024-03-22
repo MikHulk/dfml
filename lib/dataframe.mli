@@ -1,6 +1,4 @@
-module IntSet: sig
-  type t
-end
+module IntSet: Set.S with type elt = int
 
 module Ftype: sig
 
@@ -52,6 +50,9 @@ module Serie: sig
 
 end
 
+
 type dataframe = Serie.t list * IntSet.t
 
 val of_list: Serie.t list -> dataframe
+val get_serie: dataframe -> int -> Serie.t option
+val get_row_ids: dataframe -> int Seq.t
