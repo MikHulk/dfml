@@ -1,6 +1,19 @@
-let pprint_serie ppf = function
-  | Dataframe.Serie.Source _ -> Fmt.pf ppf "Source array"
-  | Derived _ -> Fmt.pf ppf "Derived array"
+let pprint_ftype ppf = function
+  | Dataframe.Ftype.Integer x -> Fmt.pf ppf "Integer %d" x
+  | Numeric (p, x) -> Fmt.pf ppf "Numeric (%d, %d)" p x
+  | String s -> Fmt.pf ppf "String \"%s\"" s
+
+let pprint_serie ppf serie =
+  let open Fmt in
+  match serie with
+  | Dataframe.Serie.Source arr ->
+    pf ppf "Source @[<2>[ %a ]@]"
+      (array ~sep:semi pprint_ftype)
+      arr
+  | Derived s ->
+    pf ppf "Derived @[<2>[ %a ]@]"
+      (seq ~sep:semi pprint_ftype)
+      s
 
 let serie_eq a b =
   Seq.for_all2 ( = ) (Dataframe.Serie.to_seq a) (Dataframe.Serie.to_seq b)
@@ -64,7 +77,6 @@ let df_of_source_and_computation () =
     "df should be indexed properly"
     (Dataframe.get_row_ids df |> List.of_seq)
     [0; 1; 2; 3; 4]
-
 
 
 let () = let open Alcotest in
