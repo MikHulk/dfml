@@ -1,12 +1,7 @@
-let pprint_ftype ppf = function
-  | Dataframe.Ftype.Integer x -> Fmt.pf ppf "Integer %d" x
-  | Numeric (p, x) -> Fmt.pf ppf "Numeric (%d, %d)" p x
-  | String s -> Fmt.pf ppf "String \"%s\"" s
+let ftype_testable =
+  let open Dataframe.Ftype in
+  Alcotest.testable pp_ftype eq
 
-let ftype_eq a b = (a=b)
-
-let ftype_testable = Alcotest.testable pprint_ftype ftype_eq
-    
 let (>>) f g x = g(f(x))
 
 let test_derive_int_to_int () =

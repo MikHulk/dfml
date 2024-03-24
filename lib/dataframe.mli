@@ -7,7 +7,9 @@ module Ftype: sig
     | Numeric of (int * int)
     | String of string
 
-  type f
+  val pp_ftype: Format.formatter -> t -> unit
+
+  val eq: t -> t -> bool
 
   val to_int: t -> int
   val to_float: t -> float
@@ -17,6 +19,8 @@ module Ftype: sig
   val num_of_int: int -> int -> t
   val num_of_float: int -> float -> t
   val of_string: string -> t
+
+  type f
 
   val from_int_to_int: (int -> int) -> f
   val from_int_to_float: (int -> float) -> f

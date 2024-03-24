@@ -1,18 +1,13 @@
-let pprint_ftype ppf = function
-  | Dataframe.Ftype.Integer x -> Fmt.pf ppf "Integer %d" x
-  | Numeric (p, x) -> Fmt.pf ppf "Numeric (%d, %d)" p x
-  | String s -> Fmt.pf ppf "String \"%s\"" s
-
 let pprint_serie ppf serie =
   let open Fmt in
   match serie with
   | Dataframe.Serie.Source arr ->
     pf ppf "Source @[<2>[ %a ]@]"
-      (array ~sep:semi pprint_ftype)
+      (array ~sep:semi Dataframe.Ftype.pp_ftype)
       arr
   | Derived s ->
     pf ppf "Derived @[<2>[ %a ]@]"
-      (seq ~sep:semi pprint_ftype)
+      (seq ~sep:semi Dataframe.Ftype.pp_ftype)
       s
 
 let serie_eq a b =

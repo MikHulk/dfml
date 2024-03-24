@@ -15,6 +15,13 @@ module Ftype = struct
     | S_S of (string -> string)
     | S_I of (string -> int)
 
+  let pp_ftype out = function
+  | Integer x -> Fmt.pf out "Integer %d" x
+  | Numeric (p, x) -> Fmt.pf out "Numeric (%d, %d)" p x
+  | String s -> Fmt.pf out "String \"%s\"" s
+
+  let eq a b = (a=b)
+
   let to_int = function
     | Integer x -> x
     | Numeric(_, x) -> x
