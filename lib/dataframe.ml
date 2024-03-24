@@ -15,11 +15,6 @@ module Ftype = struct
     | S_S of (string -> string)
     | S_I of (string -> int)
 
-  let pp_ftype out = function
-  | Integer x -> Fmt.pf out "Integer %d" x
-  | Numeric (p, x) -> Fmt.pf out "Numeric (%d, %d)" p x
-  | String s -> Fmt.pf out "String \"%s\"" s
-
   let eq a b = (a=b)
 
   let to_int = function
@@ -104,6 +99,11 @@ module Ftype = struct
     | S_S f, String s -> String (f s)
     | S_I f, String s -> Integer (f s)
     | _ -> raise (Invalid_argument "function is incompatible")
+
+  let pp_ftype out = function
+  | Integer x -> Fmt.pf out "% 10d" x
+  | Numeric (p, x) -> Fmt.pf out "% 10f" (to_float @@ Numeric(p, x))
+  | String s -> Fmt.pf out "%S" (String.sub s 0 10)
 
 end
 
@@ -243,3 +243,13 @@ let append (l, s) ns =
     (l @ [ns], s)
   else raise @@ Invalid_argument "serie is incompatible"
 let ( +: ) = append
+
+let print_df df =
+  let rowids = get_row_ids df in
+  Seq.iter
+    ( fun rowid ->
+        Format.printf "@[%a@]@."
+          (Fmt.list ~sep:Fmt.sp Ftype.pp_ftype)
+          (get_row rowid df)
+    )
+    rowids

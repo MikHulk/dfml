@@ -68,3 +68,4 @@ val get_row_ids: dataframe -> int Seq.t
 val get_row: int -> dataframe -> Ftype.t list
 val append: dataframe -> Serie.t -> dataframe
 val ( +: ): dataframe -> Serie.t -> dataframe
+val print_df: dataframe -> unit
