@@ -1,19 +1,6 @@
-let pprint_serie ppf serie =
-  let open Fmt in
-  match serie with
-  | Dataframe.Serie.Source arr ->
-    pf ppf "Source @[<2>[ %a ]@]"
-      (array ~sep:semi Dataframe.Ftype.pp_ftype)
-      arr
-  | Derived s ->
-    pf ppf "Derived @[<2>[ %a ]@]"
-      (seq ~sep:semi Dataframe.Ftype.pp_ftype)
-      s
-
-let serie_eq a b =
-  Seq.for_all2 ( = ) (Dataframe.Serie.to_seq a) (Dataframe.Serie.to_seq b)
-
-let testable_serie = Alcotest.testable pprint_serie serie_eq
+let testable_serie =
+  let open Dataframe.Serie in
+  Alcotest.testable pp_serie eq
 
 
 let df_of_sources () =

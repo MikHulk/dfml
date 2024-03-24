@@ -52,6 +52,10 @@ module Serie: sig
   val derive: Ftype.f -> t -> t
   val merge: (Ftype.t -> Ftype.t -> 'a) -> t -> t -> 'a Seq.t
 
+  val eq: t -> t -> bool
+
+  val pp_serie: Format.formatter -> t -> unit
+
 end
 
 

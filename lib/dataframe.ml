@@ -198,6 +198,21 @@ module Serie = struct
       Seq.zip seq_left seq_right
       |> Seq.map (fun (l, r) -> f l r)
 
+  let pp_serie out serie =
+    let open Fmt in
+    match serie with
+    | Source arr ->
+      pf out "Source @[<2>[ %a ]@]"
+        (array ~sep:semi Ftype.pp_ftype)
+        arr
+    | Derived s ->
+      pf out "Derived @[<2>[ %a ]@]"
+        (seq ~sep:semi Ftype.pp_ftype)
+        s
+
+  let eq a b =
+    Seq.for_all2 ( = ) (to_seq a) (to_seq b)
+
 end
 
 module IntSet = Set.Make(Int)
