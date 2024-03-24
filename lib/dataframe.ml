@@ -232,14 +232,14 @@ let of_list = function
       (h::t, Serie.to_seq h |> Seq.mapi (fun i _ -> i) |> IntSet.of_seq)
     else raise @@ Invalid_argument "series are incompatible"
 
-let get_serie (l, _) n = List.nth_opt l n
-let get_row_ids (_, rows) = IntSet.to_seq rows
+let serie (l, _) n = List.nth_opt l n
 
+let get_row_ids (_, rows) = IntSet.to_seq rows
 let get_row rowid (l, _) =
   List.map (Serie.get rowid) l
 
-let append (l, s) serie =
-  if Serie.length serie = IntSet.cardinal s then
-    (l @ [serie], s)
+let append (l, s) ns =
+  if Serie.length ns = IntSet.cardinal s then
+    (l @ [ns], s)
   else raise @@ Invalid_argument "serie is incompatible"
 let ( +: ) = append

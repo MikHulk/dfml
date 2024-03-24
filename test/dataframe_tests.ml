@@ -18,11 +18,11 @@ let df_of_sources () =
   Alcotest.(check  (option testable_serie))
     "s1 should remain the same in df"
     (Some s1)
-    ( Dataframe.get_serie df 0 );
+    ( Dataframe.serie df 0 );
   Alcotest.(check  (option testable_serie))
     "s1 should remain the same in df"
     (Some s2)
-    ( Dataframe.get_serie df 1 );
+    ( Dataframe.serie df 1 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
     [0; 1; 2; 3; 4]
@@ -50,7 +50,7 @@ let df_of_source_and_computation () =
   Alcotest.(check  (option testable_serie))
     "serie should remain the same in the df"
     (Some serie)
-    ( Dataframe.get_serie df 0 );
+    ( Dataframe.serie df 0 );
   Alcotest.(check  (option testable_serie))
     "s1 should returns cosines from serie"
     (Some
@@ -65,7 +65,7 @@ let df_of_source_and_computation () =
            )
        )
     )
-    ( Dataframe.get_serie df 1 );
+    ( Dataframe.serie df 1 );
   Alcotest.(check  (option testable_serie))
     "s2 should returns sines from serie"
     (Some 
@@ -80,7 +80,7 @@ let df_of_source_and_computation () =
            )
        )
     )
-    ( Dataframe.get_serie df 2 );
+    ( Dataframe.serie df 2 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
     [0; 1; 2; 3; 4]
@@ -113,11 +113,11 @@ let merge_2_sources () =
   Alcotest.(check  (option testable_serie))
     "s1 should remains the same in df"
     (Some s1)
-    ( Dataframe.get_serie df 0 );
+    ( Dataframe.serie df 0 );
   Alcotest.(check  (option testable_serie))
     "s2 should remains the same in df"
     (Some s2)
-    ( Dataframe.get_serie df 1 );
+    ( Dataframe.serie df 1 );
   Alcotest.(check  (option testable_serie))
     "s3 should returns the addition from S1 and s2 elements"
     (Some 
@@ -132,7 +132,7 @@ let merge_2_sources () =
            )
        )
     )
-    ( Dataframe.get_serie df 2 );
+    ( Dataframe.serie df 2 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
     [0; 1; 2; 3; 4]
@@ -274,11 +274,11 @@ let append_to_df () =
   Alcotest.(check  (option testable_serie))
     "s1 should remain the same in df"
     (Some s1)
-    ( Dataframe.get_serie df 0 );
+    ( Dataframe.serie df 0 );
   Alcotest.(check  (option testable_serie))
     "s1 should remain the same in df"
     (Some s2)
-    ( Dataframe.get_serie df 1 );
+    ( Dataframe.serie df 1 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
     [0; 1; 2; 3; 4]
