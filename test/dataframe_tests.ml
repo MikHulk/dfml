@@ -30,17 +30,17 @@ let df_of_sources () =
     |> Dataframe.Serie.nums_of_int_seq 1 in
   let df = Dataframe.of_list [s1; s2] in
   Alcotest.(check  (option testable_serie))
-    "s1 should remains the same in df"
-    ( Dataframe.get_serie df 0 )
-    (Some s1);
+    "s1 should remain the same in df"
+    (Some s1)
+    ( Dataframe.get_serie df 0 );
   Alcotest.(check  (option testable_serie))
-    "s1 should remains the same in df"
-    ( Dataframe.get_serie df 1 )
-    (Some s2);
+    "s1 should remain the same in df"
+    (Some s2)
+    ( Dataframe.get_serie df 1 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
-    (Dataframe.get_row_ids df |> List.of_seq)
     [0; 1; 2; 3; 4]
+    (Dataframe.get_row_ids df |> List.of_seq)
 
 let df_of_source_and_computation () =
   let serie =
@@ -62,21 +62,95 @@ let df_of_source_and_computation () =
       serie in
   let df = Dataframe.of_list [ serie; s1; s2 ] in
   Alcotest.(check  (option testable_serie))
-    "serie should returns cosines from serie"
-    ( Dataframe.get_serie df 0 )
-    (Some serie);
+    "serie should remain the same in the df"
+    (Some serie)
+    ( Dataframe.get_serie df 0 );
   Alcotest.(check  (option testable_serie))
     "s1 should returns cosines from serie"
-    ( Dataframe.get_serie df 1 )
-    (Some s1);
+    (Some
+       ( Dataframe.Serie.Derived
+           ( List.to_seq 
+               [ Dataframe.Ftype.Numeric (4, 10000)
+               ; Numeric (4, 5000)
+               ; Numeric (4, 0)
+               ; Numeric (4, -5000)
+               ; Numeric (4, -10000)
+               ]
+           )
+       )
+    )
+    ( Dataframe.get_serie df 1 );
   Alcotest.(check  (option testable_serie))
     "s2 should returns sines from serie"
-    ( Dataframe.get_serie df 2 )
-    (Some s2);
+    (Some 
+       ( Dataframe.Serie.Derived
+           ( List.to_seq 
+               [ Dataframe.Ftype.Numeric (4, 0)
+               ; Numeric (4, 8660)
+               ; Numeric (4, 10000)
+               ; Numeric (4, 8660)
+               ; Numeric (4, 0)
+               ]
+           )
+       )
+    )
+    ( Dataframe.get_serie df 2 );
   Alcotest.(check  (list int))
     "df should be indexed properly"
-    (Dataframe.get_row_ids df |> List.of_seq)
     [0; 1; 2; 3; 4]
+    (Dataframe.get_row_ids df |> List.of_seq)
+
+
+let merge_2_sources () =
+  let open Dataframe.Serie in
+  let open Dataframe.Ftype in
+  let s1 =
+    List.to_seq [ 511; 656; 732; 600; 523]
+    |> nums_of_int_seq 2 in
+  let s2 =
+    List.to_seq [ 1; 2; 3; 4; 5]
+    |> nums_of_int_seq 1 in
+  let f l r =
+    match l, r with
+    | Numeric(pr, x), Numeric(pl, y) ->
+      Numeric( pr
+             , x +
+               ( Float.to_int
+                   ( Float.of_int y
+                     *. (10. ** (Float.of_int pl))
+                   )
+               )
+             )
+    | _ -> raise @@ Invalid_argument "function incompatible" in
+  let s3 = Derived (merge f s1 s2) in
+  let df = Dataframe.of_list [s1; s2; s3] in
+  Alcotest.(check  (option testable_serie))
+    "s1 should remains the same in df"
+    (Some s1)
+    ( Dataframe.get_serie df 0 );
+  Alcotest.(check  (option testable_serie))
+    "s2 should remains the same in df"
+    (Some s2)
+    ( Dataframe.get_serie df 1 );
+  Alcotest.(check  (option testable_serie))
+    "s3 should returns the addition from S1 and s2 elements"
+    (Some 
+       ( Dataframe.Serie.Derived
+           ( List.to_seq 
+               [ Dataframe.Ftype.Numeric (2, 521)
+               ; Numeric (2, 676)
+               ; Numeric (2, 762)
+               ; Numeric (2, 640)
+               ; Numeric (2, 573)
+               ]
+           )
+       )
+    )
+    ( Dataframe.get_serie df 2 );
+  Alcotest.(check  (list int))
+    "df should be indexed properly"
+    [0; 1; 2; 3; 4]
+    (Dataframe.get_row_ids df |> List.of_seq)
 
 
 let () = let open Alcotest in
@@ -85,5 +159,7 @@ let () = let open Alcotest in
       test_case "build from sources" `Quick df_of_sources;
       test_case "build from source and make computation on"
         `Quick df_of_source_and_computation;
+      test_case "build from 2 sources and a merge"
+        `Quick merge_2_sources;
     ]
   ]
