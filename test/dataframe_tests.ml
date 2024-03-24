@@ -261,6 +261,28 @@ let get_rows_from_df_out_of_order () =
     "should return the first row"
     [ Numeric(2, 511);  Numeric(1, 1); Numeric(2, 521) ]
     ( Dataframe.get_row 0 df)
+
+let append_to_df () =
+  let s1 =
+    List.to_seq [ 511; 656; 732; 600; 523]
+    |> Dataframe.Serie.nums_of_int_seq 2 in
+  let s2 =
+    List.to_seq [ 1; 2; 3; 4; 5]
+    |> Dataframe.Serie.nums_of_int_seq 1 in
+  let orig = Dataframe.of_list [s1] in
+  let df = Dataframe.(orig +: s2) in
+  Alcotest.(check  (option testable_serie))
+    "s1 should remain the same in df"
+    (Some s1)
+    ( Dataframe.get_serie df 0 );
+  Alcotest.(check  (option testable_serie))
+    "s1 should remain the same in df"
+    (Some s2)
+    ( Dataframe.get_serie df 1 );
+  Alcotest.(check  (list int))
+    "df should be indexed properly"
+    [0; 1; 2; 3; 4]
+    (Dataframe.get_row_ids df |> List.of_seq)
   
 let () = let open Alcotest in
   run "Dataframe" [
@@ -276,5 +298,8 @@ let () = let open Alcotest in
       test_case "get nth row from df" `Quick get_nth_row_from_df;
       test_case "get last row from df" `Quick get_lst_row_from_df;
       test_case "get rows from df out of order" `Quick get_rows_from_df_out_of_order;
+    ];
+    "test append to df", [
+      test_case "append to df" `Quick append_to_df
     ]
   ]

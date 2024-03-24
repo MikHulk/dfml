@@ -237,3 +237,9 @@ let get_row_ids (_, rows) = IntSet.to_seq rows
 
 let get_row rowid (l, _) =
   List.map (Serie.get rowid) l
+
+let append (l, s) serie =
+  if Serie.length serie = IntSet.cardinal s then
+    (l @ [serie], s)
+  else raise @@ Invalid_argument "serie is incompatible"
+let ( +: ) = append
