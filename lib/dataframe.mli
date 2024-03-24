@@ -56,6 +56,7 @@ module Serie: sig
 
   val pp_serie: Format.formatter -> t -> unit
 
+  val get: int -> t -> Ftype.t
 end
 
 

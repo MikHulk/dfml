@@ -198,6 +198,52 @@ let test_derive_strings_to_strings () =
     ]
     res
 
+let get_from_serie () =
+  let serie =
+    List.to_seq [ "foo"; "bar"; "baz"]
+    |> Dataframe.Serie.of_string_seq in
+  Alcotest.(check ftype_testable)
+    "should return the nth element from serie"
+    (String "baz")
+    (Dataframe.Serie.get 2 serie)
+
+let get_from_seq_serie () =
+  let serie =
+    List.to_seq [ "foo"; "bar"; "baz"]
+    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.derive
+      ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
+  Alcotest.(check ftype_testable)
+    "should return the nth element from serie"
+    (String "foobaz")
+    (Dataframe.Serie.get 2 serie)
+
+let get_first_from_seq_serie () =
+  let serie =
+    List.to_seq [ "foo"; "bar"; "baz"]
+    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.derive
+      ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
+  Alcotest.(check ftype_testable)
+    "should return the nth element from serie"
+    (String "foofoo")
+    (Dataframe.Serie.get 0 serie)
+
+let get_from_seq_serie_out_of_order () =
+  let serie =
+    List.to_seq [ "foo"; "bar"; "baz"]
+    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.derive
+      ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
+  Alcotest.(check ftype_testable)
+    "should return the nth element from serie"
+    (String "foobaz")
+    (Dataframe.Serie.get 2 serie);
+  Alcotest.(check ftype_testable)
+    "should return the nth element from serie"
+    (String "foofoo")
+    (Dataframe.Serie.get 0 serie)
+
 let () = let open Alcotest in
   run "Serie" [
     "test serie derivation", [
@@ -225,5 +271,13 @@ let () = let open Alcotest in
         "derive strings to strings"
         `Quick test_derive_strings_to_strings;
       test_case "derive strings to integers" `Quick test_derive_string_to_int;
+    ];
+    "test serie get row", [
+      test_case "get nth element from serie" `Quick get_from_serie;
+      test_case "get nth element from derived serie" `Quick get_from_seq_serie;
+      test_case "get first element from derived serie"
+        `Quick get_first_from_seq_serie;
+      test_case "get nth element from derived serie out of order"
+        `Quick get_from_seq_serie_out_of_order;
     ]
   ]

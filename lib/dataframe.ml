@@ -213,6 +213,11 @@ module Serie = struct
   let eq a b =
     Seq.for_all2 ( = ) (to_seq a) (to_seq b)
 
+  let get rowid = function
+    | Source arr -> arr.(rowid)
+    | Derived seq ->
+      Seq.drop rowid seq |> Seq.take 1 |> List.of_seq |> List.hd
+
 end
 
 module IntSet = Set.Make(Int)
