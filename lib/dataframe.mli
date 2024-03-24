@@ -65,3 +65,4 @@ type dataframe = Serie.t list * IntSet.t
 val of_list: Serie.t list -> dataframe
 val get_serie: dataframe -> int -> Serie.t option
 val get_row_ids: dataframe -> int Seq.t
+val get_row: int -> dataframe -> Ftype.t list

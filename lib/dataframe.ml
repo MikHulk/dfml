@@ -233,4 +233,7 @@ let of_list = function
     else raise @@ Invalid_argument "series are incompatible"
 
 let get_serie (l, _) n = List.nth_opt l n
-let get_row_ids (_, s) = IntSet.to_seq s
+let get_row_ids (_, rows) = IntSet.to_seq rows
+
+let get_row rowid (l, _) =
+  List.map (Serie.get rowid) l
