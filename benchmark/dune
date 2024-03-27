@@ -1,4 +1,5 @@
-(executable
- (name serie)
+(executables
+ (names serie int_serie num_serie str_serie)
  (libraries dataframe)
+ (modes (best exe)(best exe)(best exe)(best exe))
 )
