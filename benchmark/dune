@@ -1,5 +1,5 @@
 (executables
- (names serie int_serie num_serie str_serie)
+ (names serie int_serie num_serie str_serie int_serie_no_gc serie_no_gc)
  (libraries dataframe)
- (modes (best exe)(best exe)(best exe)(best exe))
+ (modes (best exe)(best exe)(best exe)(best exe)(best exe)(best exe))
 )

@@ -2,11 +2,8 @@ let it = 100_000_000
 
 let time f =
     let t = Sys.time() in
-    let (minor, major, promo) = Gc.counters () in
     let _ = f () in
-    let (minor', major', promo') = Gc.counters () in
-    let consumption = (minor' -. minor) +. (major' -. major) -. (promo' -. promo) in
-    Sys.time() -. t, consumption
+    Sys.time() -. t
     
 let integer_serie_stress_test () =
   let f = fun () ->
@@ -37,12 +34,11 @@ let string_serie_stress_test () =
   time f
 
 
-let report title t c =
+let report title t =
   print_string "===========================================================";
   print_newline () ;
   Printf.printf "%#d %s\n" it title;
   Printf.printf "Execution time: %fs\n" t;
-  Printf.printf "memory consumption: %fwords\n" c;
   print_newline ()
   
 
@@ -51,10 +47,10 @@ let () =
   let job1 = Domain.spawn integer_serie_stress_test in
   let job2 = Domain.spawn numeric_serie_stress_test in
   let job3 = Domain.spawn string_serie_stress_test in
-  let t3, c3 = Domain.join job3 in
-  let t2, c2 = Domain.join job2 in
-  let t1, c1 = Domain.join job1 in
-  report "integer serie stress test" t1 c1;
-  report "numeric serie stress test" t2 c2;
-  report "string serie stress test" t3 c3;
+  let t3 = Domain.join job3 in
+  let t2 = Domain.join job2 in
+  let t1 = Domain.join job1 in
+  report "integer serie stress test" t1;
+  report "numeric serie stress test" t2;
+  report "string serie stress test" t3;
   Printf.printf "Total execution time: %fs\n" (Sys.time() -. t)
