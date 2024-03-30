@@ -117,7 +117,9 @@ module Serie = struct
     Source arr
 
   let of_int_seq seq =
-    let arr = Seq.map Ftype.of_int seq |> Array.of_seq in
+    let len = Seq.length seq in
+    let arr = Array.make len (Ftype.Integer 0) in
+    Seq.iteri (fun i x -> arr.(i) <- Ftype.of_int x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 1; 2; 3; 4; 5 ]
@@ -125,7 +127,9 @@ module Serie = struct
        = Source [| Integer 1; Integer 2; Integer 3; Integer 4; Integer 5 |]
 
   let nums_of_int_seq p seq =
-    let arr = Seq.map (Ftype.num_of_int p) seq |> Array.of_seq in
+    let len = Seq.length seq in
+    let arr = Array.make len (Ftype.Numeric(p, 0)) in
+    Seq.iteri (fun i x -> arr.(i) <- Ftype.num_of_int p x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 1; 2; 3; 4; 5 ]
@@ -139,7 +143,9 @@ module Serie = struct
          |]
 
   let nums_of_float_seq p seq =
-    let arr = Seq.map (Ftype.num_of_float p) seq |> Array.of_seq in
+    let len = Seq.length seq in
+    let arr = Array.make len (Ftype.Numeric(p, 0)) in
+    Seq.iteri (fun i x -> arr.(i) <- Ftype.num_of_float p x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 0.1; 0.2; 0.3; 0.4; 0.5 ]
@@ -153,7 +159,9 @@ module Serie = struct
          |]
 
   let of_string_seq seq =
-    let arr = Seq.map Ftype.of_string seq |> Array.of_seq in
+    let len = Seq.length seq in
+    let arr = Array.make len (Ftype.of_string "") in
+    Seq.iteri (fun i s -> arr.(i) <- Ftype.of_string s) seq;
     Source arr
   let%test _ =
     List.to_seq [ "1"; "2"; "3"; "4"; "5" ]
