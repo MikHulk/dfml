@@ -113,6 +113,9 @@ module Serie = struct
     | Source of Ftype.t array
     | Derived of Ftype.t Seq.t
 
+  let of_array arr =
+    Source arr
+
   let of_int_seq seq =
     let arr = Seq.map Ftype.of_int seq |> Array.of_seq in
     Source arr

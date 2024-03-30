@@ -7,30 +7,24 @@ let time f =
     
 let integer_serie_stress_test () =
   let f = fun () ->
-    Seq.repeat 100
-    |> Seq.take it
-    |> Seq.map Random.int
-    |> Dataframe.Serie.of_int_seq
+    Array.init it (fun _ -> Dataframe.Ftype.Integer (Random.int 100))
+    |> Dataframe.Serie.of_array
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_int_to_int ( ( * ) 50) ) in
   time f
 
 let numeric_serie_stress_test () =
   let f = fun () ->
-    Seq.repeat 100
-    |> Seq.take it
-    |> Seq.map Random.int
-    |> Dataframe.Serie.nums_of_int_seq 2
+    Array.init it (fun _ -> Dataframe.Ftype.Numeric (2, (Random.int 100)))
+    |> Dataframe.Serie.of_array
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_float_to_float cos ) in
   time f
 
 let string_serie_stress_test () =
   let f = fun () ->
-    Seq.repeat 100
-    |> Seq.take it
-    |> Seq.map Random.int
-    |> Dataframe.Serie.nums_of_int_seq 2
+    Array.init it (fun _ -> Dataframe.Ftype.String (Random.int 100 |> Int.to_string))
+    |> Dataframe.Serie.of_array
     |> Dataframe.Serie.derive
       (Dataframe.Ftype.from_int_to_str Int.to_string) in
   time f
