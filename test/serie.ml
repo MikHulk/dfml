@@ -7,7 +7,7 @@ let (>>) f g x = g(f(x))
 let test_derive_int_to_int () =
   let serie' =
     List.to_seq [ 1; 2; 3; 4; 5; 6 ]
-    |> Dataframe.Serie.of_int_seq
+    |> Dataframe.Serie.of_int_seq 6
     |> Dataframe.Serie.derive
       (Dataframe.Ftype.from_int_to_int (( + ) 2 >> ( * ) 8)) in
   let res =
@@ -23,7 +23,7 @@ let test_derive_int_to_int () =
 let test_derive_int_to_string () =
   let serie' =
     List.to_seq [ 13; 12; 34; 42; 51 ]
-    |> Dataframe.Serie.of_int_seq
+    |> Dataframe.Serie.of_int_seq 5
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_int_to_str Int.to_string ) in
   let res =
@@ -39,7 +39,7 @@ let test_derive_int_to_string () =
 let test_derive_string_to_int () =
   let serie' =
     List.to_seq [ "a"; "ab"; "abc"; "abcd"; "abcde" ]
-    |> Dataframe.Serie.of_string_seq
+    |> Dataframe.Serie.of_string_seq 5
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_str_to_int String.length ) in
   let res =
@@ -55,7 +55,7 @@ let test_derive_string_to_int () =
 let test_derive_numerics_to_numerics_process_int_returns_int () =
   let serie' =
     List.to_seq [ 13; 12; 34; 42; 51 ]
-    |> Dataframe.Serie.nums_of_int_seq 1
+    |> Dataframe.Serie.nums_of_int_seq 5 1
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_int_to_int (( + ) 100) ) in
   let res =
@@ -76,7 +76,7 @@ let test_derive_numerics_to_numerics_process_int_returns_int () =
 let test_derive_numerics_to_numerics_process_int_returns_float () =
   let serie' =
     List.to_seq [ 13; 12; 34; 42; 51 ]
-    |> Dataframe.Serie.nums_of_int_seq 1
+    |> Dataframe.Serie.nums_of_int_seq 5 1
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_int_to_float
           (Float.of_int >> (Fun.flip ( /. ) 2.))
@@ -99,7 +99,7 @@ let test_derive_numerics_to_numerics_process_int_returns_float () =
 let test_derive_numerics_to_numerics_process_int_returns_string () =
   let serie' =
     List.to_seq [ 13; 12; 34; 42; 51 ]
-    |> Dataframe.Serie.nums_of_int_seq 1
+    |> Dataframe.Serie.nums_of_int_seq 5 1
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_int_to_str Int.to_string  ) in
   let res =
@@ -120,7 +120,7 @@ let test_derive_numerics_to_numerics_process_int_returns_string () =
 let test_derive_numerics_to_numerics_process_float () =
   let serie' =
     List.to_seq [ 1300; 1200; 3400; 4200; 5100 ]
-    |> Dataframe.Serie.nums_of_int_seq 3
+    |> Dataframe.Serie.nums_of_int_seq 5 3
     |> Dataframe.Serie.derive ( Dataframe.Ftype.from_float_to_float cos ) in
   let res =
     match serie' with
@@ -140,7 +140,7 @@ let test_derive_numerics_to_numerics_process_float () =
 let test_derive_numerics_to_integers_process_float () =
   let serie' =
     List.to_seq [ 15; 14; 33; 42; 51 ]
-    |> Dataframe.Serie.nums_of_int_seq 1
+    |> Dataframe.Serie.nums_of_int_seq 5 1
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_float_to_int (( *. ) 10. >> Float.to_int)) in
   let res =
@@ -161,7 +161,7 @@ let test_derive_numerics_to_integers_process_float () =
 let test_derive_numerics_to_strings_process_float () =
   let serie' =
     List.to_seq [ 15; 14; 33; 42; 51 ]
-    |> Dataframe.Serie.nums_of_int_seq 1
+    |> Dataframe.Serie.nums_of_int_seq 5 1
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_float_to_str Float.to_string ) in
   let res =
@@ -182,7 +182,7 @@ let test_derive_numerics_to_strings_process_float () =
 let test_derive_strings_to_strings () =
   let serie' =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq
+    |> Dataframe.Serie.of_string_seq 3
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
   let res =
@@ -201,7 +201,7 @@ let test_derive_strings_to_strings () =
 let get_from_serie () =
   let serie =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq in
+    |> Dataframe.Serie.of_string_seq 3 in
   Alcotest.(check ftype_testable)
     "should return the nth element from serie"
     (String "baz")
@@ -210,7 +210,7 @@ let get_from_serie () =
 let get_from_seq_serie () =
   let serie =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.of_string_seq 3
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
   Alcotest.(check ftype_testable)
@@ -221,7 +221,7 @@ let get_from_seq_serie () =
 let get_first_from_seq_serie () =
   let serie =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.of_string_seq 3
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
   Alcotest.(check ftype_testable)
@@ -232,7 +232,7 @@ let get_first_from_seq_serie () =
 let get_from_seq_serie_out_of_order () =
   let serie =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq 
+    |> Dataframe.Serie.of_string_seq 3
     |> Dataframe.Serie.derive
       ( Dataframe.Ftype.from_str_to_str  ( ( ^ ) "foo")) in
   Alcotest.(check ftype_testable)

@@ -1,10 +1,10 @@
 let test_merge_strings () =
   let left =
     List.to_seq [ "foo"; "bar"; "baz"]
-    |> Dataframe.Serie.of_string_seq in
+    |> Dataframe.Serie.of_string_seq 3 in
   let right =
     List.to_seq [ "spam"; "eggs"; "spam"]
-    |> Dataframe.Serie.of_string_seq in
+    |> Dataframe.Serie.of_string_seq 3 in
   let merge_func l r =
     match l, r with
     | Dataframe.Ftype.String s, Dataframe.Ftype.String s' -> s ^ "_" ^ s'
@@ -21,10 +21,10 @@ let test_merge_strings () =
 let test_merge_integers () =
   let left =
     List.to_seq [ 5; 6; 7; 6; 5]
-    |> Dataframe.Serie.of_int_seq in
+    |> Dataframe.Serie.of_int_seq 5 in
   let right =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> Dataframe.Serie.of_int_seq in
+    |> Dataframe.Serie.of_int_seq 5 in
   let merge_func l r =
     match l, r with
     | Dataframe.Ftype.Integer x, Dataframe.Ftype.Integer y -> x * y
@@ -38,10 +38,10 @@ let test_merge_integers () =
 let test_merge_numerics () =
   let left =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> Dataframe.Serie.nums_of_int_seq 2 in
+    |> Dataframe.Serie.nums_of_int_seq 5 2 in
   let right =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> Dataframe.Serie.nums_of_int_seq 1 in
+    |> Dataframe.Serie.nums_of_int_seq 5 1 in
   let merge_func l r =
     match l, r with
     | Dataframe.Ftype.Numeric _, Dataframe.Ftype.Numeric _ ->

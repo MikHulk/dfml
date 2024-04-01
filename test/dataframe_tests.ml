@@ -10,10 +10,10 @@ let testable_serie =
 let df_of_sources () =
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> Dataframe.Serie.nums_of_int_seq 2 in
+    |> Dataframe.Serie.nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> Dataframe.Serie.nums_of_int_seq 1 in
+    |> Dataframe.Serie.nums_of_int_seq 5 1 in
   let df = Dataframe.of_list [s1; s2] in
   Alcotest.(check  (option testable_serie))
     "s1 should remain the same in df"
@@ -37,7 +37,7 @@ let df_of_source_and_computation () =
       ; 2. *. Float.pi /. 3.
       ; Float.pi
       ]
-    |> Dataframe.Serie.nums_of_float_seq 4 in
+    |> Dataframe.Serie.nums_of_float_seq 5 4 in
   let s1 =
     Dataframe.Serie.derive
       ( Dataframe.Ftype.from_float_to_float cos )
@@ -92,10 +92,10 @@ let merge_2_sources () =
   let open Dataframe.Ftype in
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> nums_of_int_seq 2 in
+    |> nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> nums_of_int_seq 1 in
+    |> nums_of_int_seq 5 1 in
   let f l r =
     match l, r with
     | Numeric(pr, x), Numeric(pl, y) ->
@@ -143,10 +143,10 @@ let get_fst_row_from_df () =
   let open Dataframe.Ftype in
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> nums_of_int_seq 2 in
+    |> nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> nums_of_int_seq 1 in
+    |> nums_of_int_seq 5 1 in
   let f l r =
     match l, r with
     | Numeric(pr, x), Numeric(pl, y) ->
@@ -171,10 +171,10 @@ let get_nth_row_from_df () =
   let open Dataframe.Ftype in
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> nums_of_int_seq 2 in
+    |> nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> nums_of_int_seq 1 in
+    |> nums_of_int_seq 5 1 in
   let f l r =
     match l, r with
     | Numeric(pr, x), Numeric(pl, y) ->
@@ -199,10 +199,10 @@ let get_lst_row_from_df () =
   let open Dataframe.Ftype in
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> nums_of_int_seq 2 in
+    |> nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> nums_of_int_seq 1 in
+    |> nums_of_int_seq 5 1 in
   let f l r =
     match l, r with
     | Numeric(pr, x), Numeric(pl, y) ->
@@ -227,10 +227,10 @@ let get_rows_from_df_out_of_order () =
   let open Dataframe.Ftype in
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> nums_of_int_seq 2 in
+    |> nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> nums_of_int_seq 1 in
+    |> nums_of_int_seq 5 1 in
   let f l r =
     match l, r with
     | Numeric(pr, x), Numeric(pl, y) ->
@@ -265,10 +265,10 @@ let get_rows_from_df_out_of_order () =
 let append_to_df () =
   let s1 =
     List.to_seq [ 511; 656; 732; 600; 523]
-    |> Dataframe.Serie.nums_of_int_seq 2 in
+    |> Dataframe.Serie.nums_of_int_seq 5 2 in
   let s2 =
     List.to_seq [ 1; 2; 3; 4; 5]
-    |> Dataframe.Serie.nums_of_int_seq 1 in
+    |> Dataframe.Serie.nums_of_int_seq 5 1 in
   let orig = Dataframe.of_list [s1] in
   let df = Dataframe.(orig +: s2) in
   Alcotest.(check  (option testable_serie))

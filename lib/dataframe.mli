@@ -42,10 +42,10 @@ module Serie: sig
     | Derived of Ftype.t Seq.t
 
   val of_array: Ftype.t array -> t
-  val of_int_seq: int Seq.t -> t
-  val nums_of_int_seq: int -> int Seq.t -> t
-  val nums_of_float_seq: int -> float Seq.t -> t
-  val of_string_seq: string Seq.t -> t
+  val of_int_seq: int -> int Seq.t -> t
+  val nums_of_int_seq: int -> int -> int Seq.t -> t
+  val nums_of_float_seq: int -> int -> float Seq.t -> t
+  val of_string_seq: int -> string Seq.t -> t
 
   val length: t -> int
   val to_seq: t -> Ftype.t Seq.t

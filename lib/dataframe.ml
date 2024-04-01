@@ -116,24 +116,22 @@ module Serie = struct
   let of_array arr =
     Source arr
 
-  let of_int_seq seq =
-    let len = Seq.length seq in
+  let of_int_seq len seq =
     let arr = Array.make len (Ftype.Integer 0) in
     Seq.iteri (fun i x -> arr.(i) <- Ftype.of_int x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 1; 2; 3; 4; 5 ]
-    |> of_int_seq
+    |> of_int_seq 5
        = Source [| Integer 1; Integer 2; Integer 3; Integer 4; Integer 5 |]
 
-  let nums_of_int_seq p seq =
-    let len = Seq.length seq in
+  let nums_of_int_seq len p seq =
     let arr = Array.make len (Ftype.Numeric(p, 0)) in
     Seq.iteri (fun i x -> arr.(i) <- Ftype.num_of_int p x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 1; 2; 3; 4; 5 ]
-    |> nums_of_int_seq 1
+    |> nums_of_int_seq 5 1
        = Source
          [| Numeric(1, 1)
           ; Numeric(1, 2)
@@ -142,14 +140,13 @@ module Serie = struct
           ; Numeric(1, 5)
          |]
 
-  let nums_of_float_seq p seq =
-    let len = Seq.length seq in
+  let nums_of_float_seq len p seq =
     let arr = Array.make len (Ftype.Numeric(p, 0)) in
     Seq.iteri (fun i x -> arr.(i) <- Ftype.num_of_float p x) seq;
     Source arr
   let%test _ =
     List.to_seq [ 0.1; 0.2; 0.3; 0.4; 0.5 ]
-    |> nums_of_float_seq 1
+    |> nums_of_float_seq 5 1
        = Source
          [| Numeric(1, 1)
           ; Numeric(1, 2)
@@ -158,14 +155,13 @@ module Serie = struct
           ; Numeric(1, 5)
          |]
 
-  let of_string_seq seq =
-    let len = Seq.length seq in
+  let of_string_seq len seq =
     let arr = Array.make len (Ftype.of_string "") in
     Seq.iteri (fun i s -> arr.(i) <- Ftype.of_string s) seq;
     Source arr
   let%test _ =
     List.to_seq [ "1"; "2"; "3"; "4"; "5" ]
-    |> of_string_seq
+    |> of_string_seq 5
        = Source
          [| String "1"
           ; String "2"
